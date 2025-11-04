@@ -2,11 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "QuestionDataBase.generated.h"
+#include "QuestionBase.generated.h"
 
 
 UCLASS()
-class PLAY_STADIUM_API UQuestionDataBase : public UObject
+class PLAY_STADIUM_API UQuestionBase : public UObject
 {
 	GENERATED_BODY()
 	

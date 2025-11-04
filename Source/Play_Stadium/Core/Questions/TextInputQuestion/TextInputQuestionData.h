@@ -1,10 +1,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+
+#include "../QuestionBaseData.h"
+
 #include "TextInputQuestionData.generated.h"
 
 USTRUCT(BlueprintType)
-struct FTextInputQuestionData
+struct FTextInputQuestionData : public FQuestionBaseData
 {
 	GENERATED_BODY()
 

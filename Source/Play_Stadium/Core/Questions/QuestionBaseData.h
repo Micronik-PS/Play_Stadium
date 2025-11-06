@@ -10,6 +10,6 @@ struct FQuestionBaseData
 
 
 	UPROPERTY(BlueprintReadWrite, Category = "Question Base")
-	int Reward;
+	int32 Reward;
 
 };

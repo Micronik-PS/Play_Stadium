@@ -4,6 +4,7 @@
 #include "Engine/GameInstance.h"
 
 #include "ShuffleMode.h"
+#include "Play_Stadium/Core/Questions/QuestionBase.h"
 
 #include "PlayStadiumGameInstance.generated.h"
 

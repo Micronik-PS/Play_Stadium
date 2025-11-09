@@ -9,3 +9,8 @@ const FSingleChoiceQuestionData& USingleChoiceQuestion::GetQuestionData() const
 {
 	return QuestionData;
 }
+
+QuestionType USingleChoiceQuestion::GetType() const
+{
+	return QuestionData.GetType();
+}

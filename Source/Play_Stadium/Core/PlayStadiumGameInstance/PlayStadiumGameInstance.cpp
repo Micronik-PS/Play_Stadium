@@ -134,27 +134,7 @@ void UPlayStadiumGameInstance::ApplyQuestionsShuffleMode()
 					return TNumericLimits<int32>::Max();
 				}
 
-				if (const USingleChoiceQuestion* SingleChoiceQuestion = Cast<USingleChoiceQuestion>(Question.Get()))
-				{
-					return static_cast<int32>(SingleChoiceQuestion->GetQuestionData().GetType());
-				}
-
-				if (const UMultipleChoiceQuestion* MultipleChoiceQuestion = Cast<UMultipleChoiceQuestion>(Question.Get()))
-				{
-					return static_cast<int32>(MultipleChoiceQuestion->GetQuestionData().GetType());
-				}
-
-				if (const UTextInputQuestion* TextInputQuestion = Cast<UTextInputQuestion>(Question.Get()))
-				{
-					return static_cast<int32>(TextInputQuestion->GetQuestionData().GetType());
-				}
-
-				if (const UMatchingQuestion* MatchingQuestion = Cast<UMatchingQuestion>(Question.Get()))
-				{
-					return static_cast<int32>(MatchingQuestion->GetQuestionData().GetType());
-				}
-
-				return TNumericLimits<int32>::Max();
+				return static_cast<int32>(Question->GetType());
 			};
 
 			Algo::Sort(Questions, [&GetQuestionTypeValue](const TObjectPtr<UQuestionBase>& Left, const TObjectPtr<UQuestionBase>& Right)

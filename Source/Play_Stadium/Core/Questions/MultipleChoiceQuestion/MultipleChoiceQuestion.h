@@ -16,6 +16,7 @@ class PLAY_STADIUM_API UMultipleChoiceQuestion : public UQuestionBase
 public:
 	void InitializeQuestionData(const FMultipleChoiceQuestionData& InData);
 	const FMultipleChoiceQuestionData& GetQuestionData() const;
+	virtual QuestionType GetType() const override;
 
 protected:
 

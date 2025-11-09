@@ -1,7 +1,10 @@
 #include "PlayStadiumGameInstance.h"
 
+#include "Algo/RandomShuffle.h"
+#include "Algo/Sort.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "HAL/NumericLimits.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -107,6 +110,61 @@ void UPlayStadiumGameInstance::LoadQuestionsFromJson()
 		{
 			UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Failed to parse question at index %d."), QuestionIndex);
 		}
+	}
+
+	ApplyQuestionsShuffleMode();
+}
+
+
+void UPlayStadiumGameInstance::ApplyQuestionsShuffleMode()
+{
+	switch (QuestionsShuffleMode)
+	{
+	case ShuffleMode::ShuffleNone:
+		return;
+
+	case ShuffleMode::ShuffleRandom:
+		Algo::RandomShuffle(Questions);
+		return;
+
+	case ShuffleMode::ShuffleTypeSort:
+		{
+			const auto GetQuestionTypeValue = [](const TObjectPtr<UQuestionBase>& Question) -> int32
+			{
+				if (!Question)
+				{
+					return TNumericLimits<int32>::Max();
+				}
+
+				if (const USingleChoiceQuestion* SingleChoiceQuestion = Cast<USingleChoiceQuestion>(Question.Get()))
+				{
+					return static_cast<int32>(SingleChoiceQuestion->GetQuestionData().GetType());
+				}
+
+				if (const UMultipleChoiceQuestion* MultipleChoiceQuestion = Cast<UMultipleChoiceQuestion>(Question.Get()))
+				{
+					return static_cast<int32>(MultipleChoiceQuestion->GetQuestionData().GetType());
+				}
+
+				if (const UTextInputQuestion* TextInputQuestion = Cast<UTextInputQuestion>(Question.Get()))
+				{
+					return static_cast<int32>(TextInputQuestion->GetQuestionData().GetType());
+				}
+
+				if (const UMatchingQuestion* MatchingQuestion = Cast<UMatchingQuestion>(Question.Get()))
+				{
+					return static_cast<int32>(MatchingQuestion->GetQuestionData().GetType());
+				}
+
+				return TNumericLimits<int32>::Max();
+			};
+
+			Algo::Sort(Questions, [&GetQuestionTypeValue](const TObjectPtr<UQuestionBase>& Left, const TObjectPtr<UQuestionBase>& Right)
+			{
+				return GetQuestionTypeValue(Left) < GetQuestionTypeValue(Right);
+			});
+		}
+		return;
 	}
 }
 

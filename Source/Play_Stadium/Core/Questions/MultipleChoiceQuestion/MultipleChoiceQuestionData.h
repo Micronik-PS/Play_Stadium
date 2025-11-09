@@ -6,11 +6,14 @@
 
 #include "MultipleChoiceQuestionData.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FMultipleChoiceQuestionData : public FQuestionBaseData
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite, Category = "Multiple Choice Question")
+	FString QuestionText;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Multiple Choice Question")
 	TMap<FString, bool> Choices;

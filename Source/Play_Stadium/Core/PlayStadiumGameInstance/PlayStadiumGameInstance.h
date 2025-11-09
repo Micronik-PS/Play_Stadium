@@ -18,4 +18,6 @@ protected:
 
 	ShuffleMode QuestionsShuffleMode;
 
+	TArray<UQuestionBase> Questions;
+
 };

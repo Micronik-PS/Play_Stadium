@@ -6,11 +6,15 @@
 
 #include "SingleChoiceQuestionData.generated.h"
 
+
 USTRUCT(BlueprintType)
 struct FSingleChoiceQuestionData : public FQuestionBaseData
 {
 	GENERATED_BODY()
 
+
+	UPROPERTY(BlueprintReadWrite, Category = "Single Choice Question")
+	FString QuestionText;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Single Choice Question")
 	TMap<FString, bool> Choices;

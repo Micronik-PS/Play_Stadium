@@ -27,6 +27,7 @@ class PLAY_STADIUM_API UPlayStadiumGameInstance : public UGameInstance
 	protected:
 	void LoadQuestionsFromJson();
 	bool TryParseQuestionObject(const TSharedPtr<FJsonObject>& QuestionObject, TObjectPtr<UQuestionBase>& OutQuestion);
+	void ApplyQuestionsShuffleMode();
 
 	bool TryReadIntegerField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, int32& OutValue) const;
 	bool TryReadStringField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, FString& OutValue) const;

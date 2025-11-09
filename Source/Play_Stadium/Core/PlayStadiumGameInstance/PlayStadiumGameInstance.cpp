@@ -4,7 +4,6 @@
 #include "Algo/Sort.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
-#include "HAL/NumericLimits.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -34,6 +33,7 @@ void UPlayStadiumGameInstance::Init()
 	Super::Init();
 
 	LoadQuestionsFromJson();
+	ApplyQuestionsShuffleMode();
 }
 
 
@@ -111,8 +111,6 @@ void UPlayStadiumGameInstance::LoadQuestionsFromJson()
 			UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Failed to parse question at index %d."), QuestionIndex);
 		}
 	}
-
-	ApplyQuestionsShuffleMode();
 }
 
 

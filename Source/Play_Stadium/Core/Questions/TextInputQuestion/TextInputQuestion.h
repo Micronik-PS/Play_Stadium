@@ -13,6 +13,9 @@ class PLAY_STADIUM_API UTextInputQuestion : public UQuestionBase
 {
 	GENERATED_BODY()
 
+public:
+	void InitializeQuestionData(const FTextInputQuestionData& InData);
+	const FTextInputQuestionData& GetQuestionData() const;
 
 protected:
 

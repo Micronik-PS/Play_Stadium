@@ -13,6 +13,9 @@ class PLAY_STADIUM_API USingleChoiceQuestion : public UQuestionBase
 {
 	GENERATED_BODY()
 
+public:
+	void InitializeQuestionData(const FSingleChoiceQuestionData& InData);
+	const FSingleChoiceQuestionData& GetQuestionData() const;
 
 protected:
 

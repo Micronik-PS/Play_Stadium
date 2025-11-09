@@ -1,5 +1,9 @@
 #pragma once
 
+#include "CoreMinimal.h"
+#include "ShuffleMode.generated.h"
+
+
 UENUM(BlueprintType)
 enum class ShuffleMode : uint8
 {

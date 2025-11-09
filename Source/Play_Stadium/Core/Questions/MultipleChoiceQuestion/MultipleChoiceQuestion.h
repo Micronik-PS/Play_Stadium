@@ -13,6 +13,9 @@ class PLAY_STADIUM_API UMultipleChoiceQuestion : public UQuestionBase
 {
 	GENERATED_BODY()
 
+public:
+	void InitializeQuestionData(const FMultipleChoiceQuestionData& InData);
+	const FMultipleChoiceQuestionData& GetQuestionData() const;
 
 protected:
 

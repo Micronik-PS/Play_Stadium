@@ -12,7 +12,9 @@ UCLASS()
 class PLAY_STADIUM_API UPlayStadiumGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
+protected:
+
 	ShuffleMode QuestionsShuffleMode;
 
 };

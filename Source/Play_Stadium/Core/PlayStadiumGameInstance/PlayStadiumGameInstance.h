@@ -37,4 +37,8 @@ class PLAY_STADIUM_API UPlayStadiumGameInstance : public UGameInstance
 
 	UPROPERTY(BlueprintReadOnly, Category = "Questions")
 	TArray<TObjectPtr<UQuestionBase>> Questions;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Questions")
+	TMap<EQuestionType, TSoftObjectPtr<UDataTable>> MapsByType;
+
 };

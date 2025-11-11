@@ -18,10 +18,9 @@ class PLAY_STADIUM_API UPlayStadiumGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 
-	public:
 	virtual void Init() override;
 
-	ShuffleMode GetQuestionsShuffleMode() const { return QuestionsShuffleMode; }
+	EShuffleMode GetQuestionsShuffleMode() const { return QuestionsShuffleMode; }
 	const TArray<TObjectPtr<UQuestionBase>>& GetQuestions() const { return Questions; }
 
 	protected:
@@ -34,7 +33,7 @@ class PLAY_STADIUM_API UPlayStadiumGameInstance : public UGameInstance
 
 	protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Questions")
-	ShuffleMode QuestionsShuffleMode = ShuffleMode::ShuffleNone;
+	EShuffleMode QuestionsShuffleMode = EShuffleMode::ShuffleNone;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Questions")
 	TArray<TObjectPtr<UQuestionBase>> Questions;

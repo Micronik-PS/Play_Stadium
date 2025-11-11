@@ -16,7 +16,7 @@ class PLAY_STADIUM_API USingleChoiceQuestion : public UQuestionBase
 public:
 	void InitializeQuestionData(const FSingleChoiceQuestionData& InData);
 	const FSingleChoiceQuestionData& GetQuestionData() const;
-	virtual QuestionType GetType() const override;
+	virtual EQuestionType GetType() const override;
 
 protected:
 

@@ -5,7 +5,7 @@
 
 
 UENUM(BlueprintType)
-enum class QuestionType : uint8
+enum class EQuestionType : uint8
 {
 	ErrorQuestion		    UMETA(DisplayName = "Error"),
     SingleChoiceQuestion    UMETA(DisplayName = "SingleChoiceQuestion"),

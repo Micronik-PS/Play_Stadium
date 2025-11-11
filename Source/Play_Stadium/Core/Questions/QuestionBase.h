@@ -14,5 +14,5 @@ class PLAY_STADIUM_API UQuestionBase : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual QuestionType GetType() const PURE_VIRTUAL(UQuestionBase::GetType, return QuestionType::ErrorQuestion;);
+	virtual EQuestionType GetType() const PURE_VIRTUAL(UQuestionBase::GetType, return EQuestionType::ErrorQuestion;);
 };

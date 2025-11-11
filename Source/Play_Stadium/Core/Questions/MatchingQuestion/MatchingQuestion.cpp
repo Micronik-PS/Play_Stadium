@@ -10,7 +10,7 @@ const FMatchingQuestionData& UMatchingQuestion::GetQuestionData() const
 	return QuestionData;
 }
 
-QuestionType UMatchingQuestion::GetType() const
+EQuestionType UMatchingQuestion::GetType() const
 {
 	return QuestionData.GetType();
 }

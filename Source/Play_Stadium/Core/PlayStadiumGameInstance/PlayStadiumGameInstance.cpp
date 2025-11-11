@@ -64,24 +64,24 @@ void UPlayStadiumGameInstance::LoadQuestionsFromJson()
 		return;
 	}
 
-	int32 ShuffleModeValue = static_cast<int32>(ShuffleMode::ShuffleNone);
+	int32 ShuffleModeValue = static_cast<int32>(EShuffleMode::ShuffleNone);
 	if (TryReadIntegerField(RootObject, TEXT("QuestionsShuffleMode"), ShuffleModeValue))
 	{
-		if (ShuffleModeValue >= static_cast<int32>(ShuffleMode::ShuffleNone) &&
-		ShuffleModeValue <= static_cast<int32>(ShuffleMode::ShuffleTypeSort))
+		if (ShuffleModeValue >= static_cast<int32>(EShuffleMode::ShuffleNone) &&
+		ShuffleModeValue <= static_cast<int32>(EShuffleMode::ShuffleTypeSort))
 		{
-			QuestionsShuffleMode = static_cast<ShuffleMode>(ShuffleModeValue);
+			QuestionsShuffleMode = static_cast<EShuffleMode>(ShuffleModeValue);
 		}
 		else
 		{
 			UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Shuffle mode value %d is out of range. Using default value."), ShuffleModeValue);
-			QuestionsShuffleMode = ShuffleMode::ShuffleNone;
+			QuestionsShuffleMode = EShuffleMode::ShuffleNone;
 		}
 	}
 	else
 	{
 		UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("QuestionsShuffleMode field is missing in %s. Using default value."), *QuestionsFilePath);
-		QuestionsShuffleMode = ShuffleMode::ShuffleNone;
+		QuestionsShuffleMode = EShuffleMode::ShuffleNone;
 	}
 
 	const TArray<TSharedPtr<FJsonValue>>* QuestionsArray = nullptr;
@@ -118,14 +118,14 @@ void UPlayStadiumGameInstance::ApplyQuestionsShuffleMode()
 {
 	switch (QuestionsShuffleMode)
 	{
-	case ShuffleMode::ShuffleNone:
+	case EShuffleMode::ShuffleNone:
 		return;
 
-	case ShuffleMode::ShuffleRandom:
+	case EShuffleMode::ShuffleRandom:
 		Algo::RandomShuffle(Questions);
 		return;
 
-	case ShuffleMode::ShuffleTypeSort:
+	case EShuffleMode::ShuffleTypeSort:
 		{
 			const auto GetQuestionTypeValue = [](const TObjectPtr<UQuestionBase>& Question) -> int32
 			{
@@ -177,18 +177,18 @@ bool UPlayStadiumGameInstance::TryParseQuestionObject(const TSharedPtr<FJsonObje
 		return false;
 	}
 
-	if (TypeValue < static_cast<int32>(QuestionType::SingleChoiceQuestion) ||
-	TypeValue > static_cast<int32>(QuestionType::MatchingQuestion))
+	if (TypeValue < static_cast<int32>(EQuestionType::SingleChoiceQuestion) ||
+	TypeValue > static_cast<int32>(EQuestionType::MatchingQuestion))
 	{
 		UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Question has invalid Type value %d."), TypeValue);
 		return false;
 	}
 
-	const QuestionType ParsedType = static_cast<QuestionType>(TypeValue);
+	const EQuestionType ParsedType = static_cast<EQuestionType>(TypeValue);
 
 	switch (ParsedType)
 	{
-	case QuestionType::SingleChoiceQuestion:
+	case EQuestionType::SingleChoiceQuestion:
 		{
 			USingleChoiceQuestion* Question = NewObject<USingleChoiceQuestion>(this);
 			if (!Question)
@@ -235,7 +235,7 @@ bool UPlayStadiumGameInstance::TryParseQuestionObject(const TSharedPtr<FJsonObje
 			return true;
 		}
 
-	case QuestionType::MultipleChoiceQuestion:
+	case EQuestionType::MultipleChoiceQuestion:
 		{
 			UMultipleChoiceQuestion* Question = NewObject<UMultipleChoiceQuestion>(this);
 			if (!Question)
@@ -282,7 +282,7 @@ bool UPlayStadiumGameInstance::TryParseQuestionObject(const TSharedPtr<FJsonObje
 			return true;
 		}
 
-	case QuestionType::TextInputQuestion:
+	case EQuestionType::TextInputQuestion:
 		{
 			UTextInputQuestion* Question = NewObject<UTextInputQuestion>(this);
 			if (!Question)
@@ -320,7 +320,7 @@ bool UPlayStadiumGameInstance::TryParseQuestionObject(const TSharedPtr<FJsonObje
 			return true;
 		}
 
-	case QuestionType::MatchingQuestion:
+	case EQuestionType::MatchingQuestion:
 		{
 			UMatchingQuestion* Question = NewObject<UMatchingQuestion>(this);
 			if (!Question)

@@ -10,7 +10,7 @@ const FMultipleChoiceQuestionData& UMultipleChoiceQuestion::GetQuestionData() co
 	return QuestionData;
 }
 
-QuestionType UMultipleChoiceQuestion::GetType() const
+EQuestionType UMultipleChoiceQuestion::GetType() const
 {
 	return QuestionData.GetType();
 }

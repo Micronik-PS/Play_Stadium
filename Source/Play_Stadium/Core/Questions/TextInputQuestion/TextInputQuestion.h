@@ -16,7 +16,7 @@ class PLAY_STADIUM_API UTextInputQuestion : public UQuestionBase
 public:
 	void InitializeQuestionData(const FTextInputQuestionData& InData);
 	const FTextInputQuestionData& GetQuestionData() const;
-	virtual QuestionType GetType() const override;
+	virtual EQuestionType GetType() const override;
 
 protected:
 

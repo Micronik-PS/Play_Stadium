@@ -10,7 +10,7 @@ const FTextInputQuestionData& UTextInputQuestion::GetQuestionData() const
 	return QuestionData;
 }
 
-QuestionType UTextInputQuestion::GetType() const
+EQuestionType UTextInputQuestion::GetType() const
 {
 	return QuestionData.GetType();
 }

@@ -3,7 +3,7 @@
 
 FQuestionBaseData::FQuestionBaseData()
 	: Reward(0)
-	, Type(QuestionType::SingleChoiceQuestion)
+	, Type(EQuestionType::SingleChoiceQuestion)
 	, TimeLimitInSeconds(0)
 {
 }
@@ -13,7 +13,7 @@ void FQuestionBaseData::SetReward(int32 InReward)
 	Reward = InReward;
 }
 
-void FQuestionBaseData::SetType(QuestionType InType)
+void FQuestionBaseData::SetType(EQuestionType InType)
 {
 	Type = InType;
 }
@@ -28,7 +28,7 @@ int32 FQuestionBaseData::GetReward() const
 	return Reward;
 }
 
-QuestionType FQuestionBaseData::GetType() const
+EQuestionType FQuestionBaseData::GetType() const
 {
 	return Type;
 }

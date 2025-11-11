@@ -16,7 +16,7 @@ class PLAY_STADIUM_API UMatchingQuestion : public UQuestionBase
 public:
 	void InitializeQuestionData(const FMatchingQuestionData& InData);
 	const FMatchingQuestionData& GetQuestionData() const;
-	virtual QuestionType GetType() const override;
+	virtual EQuestionType GetType() const override;
 
 protected:
 

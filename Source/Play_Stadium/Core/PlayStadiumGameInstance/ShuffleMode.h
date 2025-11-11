@@ -5,7 +5,7 @@
 
 
 UENUM(BlueprintType)
-enum class ShuffleMode : uint8
+enum class EShuffleMode : uint8
 {
     ShuffleNone         UMETA(DisplayName = "ShuffleNone"),
     ShuffleRandom       UMETA(DisplayName = "ShuffleRandom"),

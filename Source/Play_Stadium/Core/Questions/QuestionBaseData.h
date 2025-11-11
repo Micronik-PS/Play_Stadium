@@ -16,11 +16,11 @@ public:
 	FQuestionBaseData();
 
 	void SetReward(int32 InReward);
-	void SetType(QuestionType InType);
+	void SetType(EQuestionType InType);
 	void SetTimeLimitInSeconds(int32 InTimeLimit);
 
 	int32 GetReward() const;
-	QuestionType GetType() const;
+	EQuestionType GetType() const;
 	int32 GetTimeLimitInSeconds() const;
 
 protected:
@@ -28,7 +28,7 @@ protected:
 	int32 Reward;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Question Base")
-	QuestionType Type;
+	EQuestionType Type;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Question Base")
 	int32 TimeLimitInSeconds;

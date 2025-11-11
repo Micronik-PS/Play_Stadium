@@ -9,6 +9,9 @@
 #include "Serialization/JsonReader.h"
 #include "Serialization/JsonSerializer.h"
 
+#include "Engine/DataTable.h"
+#include "Kismet/GameplayStatics.h"
+
 #include "Play_Stadium/Core/Questions/MatchingQuestion/MatchingQuestion.h"
 #include "Play_Stadium/Core/Questions/MatchingQuestion/MatchingQuestionData.h"
 #include "Play_Stadium/Core/Questions/MultipleChoiceQuestion/MultipleChoiceQuestion.h"
@@ -17,6 +20,7 @@
 #include "Play_Stadium/Core/Questions/SingleChoiceQuestion/SingleChoiceQuestionData.h"
 #include "Play_Stadium/Core/Questions/TextInputQuestion/TextInputQuestion.h"
 #include "Play_Stadium/Core/Questions/TextInputQuestion/TextInputQuestionData.h"
+#include "Play_Stadium/Core/Data/QuestionMapListData/QuestionMapListData.h"
 
 
 namespace
@@ -30,18 +34,90 @@ DEFINE_LOG_CATEGORY_STATIC(LogPlayStadiumGameInstance, Log, All);
 
 void UPlayStadiumGameInstance::Init()
 {
-	Super::Init();
+        Super::Init();
 
-	LoadQuestionsFromJson();
-	ApplyQuestionsShuffleMode();
+        LoadQuestionsFromJson();
+        ApplyQuestionsShuffleMode();
+}
+
+void UPlayStadiumGameInstance::HandleStartTestRequested()
+{
+        if (Questions.IsEmpty())
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: questions list is empty."));
+                return;
+        }
+
+        if (NextQuestionIndex >= Questions.Num())
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: all questions have already been used."));
+                return;
+        }
+
+        const TObjectPtr<UQuestionBase> CurrentQuestion = Questions[NextQuestionIndex];
+        ++NextQuestionIndex;
+
+        if (!CurrentQuestion)
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: selected question is invalid."));
+                return;
+        }
+
+        const EQuestionType QuestionType = CurrentQuestion->GetType();
+
+        const TSoftObjectPtr<UDataTable>* const DataTableEntry = MapsByType.Find(QuestionType);
+        if (!DataTableEntry)
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("No data table configured for question type %d."), static_cast<int32>(QuestionType));
+                return;
+        }
+
+        UDataTable* const QuestionMapTable = DataTableEntry->LoadSynchronous();
+        if (!QuestionMapTable)
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Failed to load data table for question type %d."), static_cast<int32>(QuestionType));
+                return;
+        }
+
+        const TArray<FName> RowNames = QuestionMapTable->GetRowNames();
+        if (RowNames.IsEmpty())
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Data table for question type %d has no rows."), static_cast<int32>(QuestionType));
+                return;
+        }
+
+        const int32 RandomRowIndex = FMath::RandRange(0, RowNames.Num() - 1);
+        const FName& SelectedRowName = RowNames[RandomRowIndex];
+
+        const FQuestionMapListData* const RowData = QuestionMapTable->FindRow<FQuestionMapListData>(SelectedRowName, TEXT("HandleStartTestRequested"));
+        if (!RowData)
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Failed to find row '%s' in question map data table."), *SelectedRowName.ToString());
+                return;
+        }
+
+        TSoftObjectPtr<UWorld> SelectedMap = RowData->Map;
+        if (!SelectedMap.IsValid())
+        {
+                SelectedMap.LoadSynchronous();
+        }
+
+        if (!SelectedMap.IsValid())
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Failed to load map for row '%s'."), *SelectedRowName.ToString());
+                return;
+        }
+
+        UGameplayStatics::OpenLevelBySoftObjectPtr(this, SelectedMap);
 }
 
 
 void UPlayStadiumGameInstance::LoadQuestionsFromJson()
 {
-	Questions.Reset();
+        Questions.Reset();
+        NextQuestionIndex = 0;
 
-	const FString QuestionsFilePath = FPaths::Combine(FPaths::ProjectConfigDir(), QuestionsDefinitionFileName);
+        const FString QuestionsFilePath = FPaths::Combine(FPaths::ProjectConfigDir(), QuestionsDefinitionFileName);
 
 	if (!FPaths::FileExists(QuestionsFilePath))
 	{

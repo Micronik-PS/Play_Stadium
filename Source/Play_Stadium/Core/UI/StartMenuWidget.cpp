@@ -15,6 +15,7 @@
 #include "Styling/CoreStyle.h"
 #include "Styling/SlateBrush.h"
 #include "Styling/SlateColor.h"
+#include "Styling/SlateTypes.h"
 
 #include "Play_Stadium/Core/PlayStadiumGameInstance/PlayStadiumGameInstance.h"
 
@@ -48,10 +49,8 @@ void UStartMenuWidget::BuildLayout()
                 return;
         }
 
-        WidgetTree->RootWidget = nullptr;
-
         RootCanvas = WidgetTree->ConstructWidget<UCanvasPanel>(UCanvasPanel::StaticClass(), TEXT("RootCanvas"));
-        WidgetTree->SetRootWidget(RootCanvas);
+        WidgetTree->RootWidget = RootCanvas;
 
         UImage* BackgroundImage = WidgetTree->ConstructWidget<UImage>(UImage::StaticClass(), TEXT("Background"));
         BackgroundImage->SetColorAndOpacity(FLinearColor(0.02f, 0.05f, 0.08f, 0.92f));
@@ -106,13 +105,31 @@ void UStartMenuWidget::BuildLayout()
         }
 
         StartTestButton = CreateMenuButton(FText::FromString(TEXT("Начать тест")), StartTestLabel);
-        if (UVerticalBoxSlot* StartButtonSlot = VerticalBox->AddChildToVerticalBox(StartTestButton))
+        if (StartTestButton)
         {
-                StartButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, SpacingBetweenButtons));
+                USizeBox* StartButtonContainer = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("StartButtonContainer"));
+                StartButtonContainer->SetHeightOverride(ButtonHeight);
+                StartButtonContainer->SetContent(StartTestButton);
+
+                if (UVerticalBoxSlot* StartButtonSlot = VerticalBox->AddChildToVerticalBox(StartButtonContainer))
+                {
+                        StartButtonSlot->SetPadding(FMargin(0.0f, 0.0f, 0.0f, SpacingBetweenButtons));
+                        StartButtonSlot->SetHorizontalAlignment(HAlign_Fill);
+                }
         }
 
         ExitButton = CreateMenuButton(FText::FromString(TEXT("Выход")), ExitLabel);
-        VerticalBox->AddChildToVerticalBox(ExitButton);
+        if (ExitButton)
+        {
+                USizeBox* ExitButtonContainer = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ExitButtonContainer"));
+                ExitButtonContainer->SetHeightOverride(ButtonHeight);
+                ExitButtonContainer->SetContent(ExitButton);
+
+                if (UVerticalBoxSlot* ExitButtonSlot = VerticalBox->AddChildToVerticalBox(ExitButtonContainer))
+                {
+                        ExitButtonSlot->SetHorizontalAlignment(HAlign_Fill);
+                }
+        }
 }
 
 void UStartMenuWidget::BindButtonCallbacks()
@@ -130,7 +147,7 @@ void UStartMenuWidget::BindButtonCallbacks()
         }
 }
 
-UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, UTextBlock*& OutLabel) const
+UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, TObjectPtr<UTextBlock>& OutLabel) const
 {
         if (!WidgetTree)
         {
@@ -139,20 +156,24 @@ UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, UTextBlock*& Out
         }
 
         UButton* Button = WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
-        Button->SetMinDesiredHeight(ButtonHeight);
-        Button->SetPadding(FMargin(ButtonPadding));
 
-        FSlateBrush NormalBrush = Button->WidgetStyle.Normal;
+        FButtonStyle ButtonStyle = Button->GetStyle();
+
+        FSlateBrush NormalBrush = ButtonStyle.Normal;
         NormalBrush.TintColor = FSlateColor(FLinearColor(0.05f, 0.32f, 0.62f, 1.0f));
-        Button->WidgetStyle.SetNormal(NormalBrush);
+        ButtonStyle.Normal = NormalBrush;
 
-        FSlateBrush HoveredBrush = Button->WidgetStyle.Hovered;
+        FSlateBrush HoveredBrush = ButtonStyle.Hovered;
         HoveredBrush.TintColor = FSlateColor(FLinearColor(0.08f, 0.45f, 0.85f, 1.0f));
-        Button->WidgetStyle.SetHovered(HoveredBrush);
+        ButtonStyle.Hovered = HoveredBrush;
 
-        FSlateBrush PressedBrush = Button->WidgetStyle.Pressed;
+        FSlateBrush PressedBrush = ButtonStyle.Pressed;
         PressedBrush.TintColor = FSlateColor(FLinearColor(0.02f, 0.2f, 0.42f, 1.0f));
-        Button->WidgetStyle.SetPressed(PressedBrush);
+        ButtonStyle.Pressed = PressedBrush;
+
+        ButtonStyle.NormalPadding = FMargin(ButtonPadding);
+        ButtonStyle.PressedPadding = FMargin(ButtonPadding);
+        Button->SetStyle(ButtonStyle);
 
         OutLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());
         OutLabel->SetText(Label);
@@ -160,7 +181,7 @@ UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, UTextBlock*& Out
         OutLabel->SetColorAndOpacity(FSlateColor(FLinearColor::White));
         OutLabel->SetFont(FCoreStyle::GetDefaultFontStyle(TEXT("Medium"), 24));
 
-        if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(Button->AddChild(OutLabel)))
+        if (UButtonSlot* ButtonSlot = Cast<UButtonSlot>(Button->AddChild(OutLabel.Get())))
         {
                 ButtonSlot->SetHorizontalAlignment(HAlign_Center);
                 ButtonSlot->SetVerticalAlignment(VAlign_Center);

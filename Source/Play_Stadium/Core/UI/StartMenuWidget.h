@@ -22,7 +22,7 @@ private:
         void BuildLayout();
         void BindButtonCallbacks();
 
-        UButton* CreateMenuButton(const FText& Label, UTextBlock*& OutLabel) const;
+        UButton* CreateMenuButton(const FText& Label, TObjectPtr<UTextBlock>& OutLabel) const;
 
         UFUNCTION()
         void HandleStartTestClicked();

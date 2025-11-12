@@ -29,15 +29,33 @@ namespace
         constexpr float SpacingBetweenButtons = 20.0f;
 }
 
+TSharedRef<SWidget> UStartMenuWidget::RebuildWidget()
+{
+        if (!WidgetTree)
+        {
+                WidgetTree = NewObject<UWidgetTree>(this, TEXT("WidgetTree"));
+                WidgetTree->SetFlags(RF_Transactional);
+        }
+
+        if (WidgetTree)
+        {
+                WidgetTree->RootWidget = nullptr;
+        }
+
+        ResetLayoutReferences();
+        BuildLayout();
+
+        if (WidgetTree && WidgetTree->RootWidget)
+        {
+                return WidgetTree->RootWidget->TakeWidget();
+        }
+
+        return Super::RebuildWidget();
+}
+
 void UStartMenuWidget::NativePreConstruct()
 {
         Super::NativePreConstruct();
-
-        if (!bIsLayoutBuilt)
-        {
-                BuildLayout();
-                bIsLayoutBuilt = true;
-        }
 }
 
 void UStartMenuWidget::NativeConstruct()
@@ -150,6 +168,19 @@ void UStartMenuWidget::BindButtonCallbacks()
                 ExitButton->OnClicked.RemoveAll(this);
                 ExitButton->OnClicked.AddDynamic(this, &UStartMenuWidget::HandleExitClicked);
         }
+}
+
+void UStartMenuWidget::ResetLayoutReferences()
+{
+        RootCanvas = nullptr;
+        ContentBorder = nullptr;
+        ContentSizeBox = nullptr;
+        TitleLabel = nullptr;
+        SubtitleLabel = nullptr;
+        StartTestButton = nullptr;
+        ExitButton = nullptr;
+        StartTestLabel = nullptr;
+        ExitLabel = nullptr;
 }
 
 UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, TObjectPtr<UTextBlock>& OutLabel) const

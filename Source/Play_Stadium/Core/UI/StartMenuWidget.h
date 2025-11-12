@@ -16,12 +16,14 @@ class PLAY_STADIUM_API UStartMenuWidget : public UUserWidget
         GENERATED_BODY()
 
 protected:
+        virtual TSharedRef<SWidget> RebuildWidget() override;
         virtual void NativePreConstruct() override;
         virtual void NativeConstruct() override;
 
 private:
         void BuildLayout();
         void BindButtonCallbacks();
+        void ResetLayoutReferences();
 
         UButton* CreateMenuButton(const FText& Label, TObjectPtr<UTextBlock>& OutLabel) const;
 
@@ -58,6 +60,4 @@ private:
 
         UPROPERTY(Transient)
         TObjectPtr<UTextBlock> ExitLabel = nullptr;
-
-        bool bIsLayoutBuilt = false;
 };

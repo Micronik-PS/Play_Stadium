@@ -9,36 +9,41 @@
 
 #include "PlayStadiumGameInstance.generated.h"
 
-
 class FJsonObject;
-
+class UDataTable;
 
 UCLASS()
 class PLAY_STADIUM_API UPlayStadiumGameInstance : public UGameInstance
 {
-	GENERATED_BODY()
+        GENERATED_BODY()
 
-	virtual void Init() override;
+public:
+        virtual void Init() override;
 
-	EShuffleMode GetQuestionsShuffleMode() const { return QuestionsShuffleMode; }
-	const TArray<TObjectPtr<UQuestionBase>>& GetQuestions() const { return Questions; }
+        EShuffleMode GetQuestionsShuffleMode() const { return QuestionsShuffleMode; }
+        const TArray<TObjectPtr<UQuestionBase>>& GetQuestions() const { return Questions; }
 
-	protected:
-	void LoadQuestionsFromJson();
-	bool TryParseQuestionObject(const TSharedPtr<FJsonObject>& QuestionObject, TObjectPtr<UQuestionBase>& OutQuestion);
-	void ApplyQuestionsShuffleMode();
+        UFUNCTION(BlueprintCallable, Category = "Questions")
+        void HandleStartTestRequested();
 
-	bool TryReadIntegerField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, int32& OutValue) const;
-	bool TryReadStringField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, FString& OutValue) const;
+protected:
+        void LoadQuestionsFromJson();
+        bool TryParseQuestionObject(const TSharedPtr<FJsonObject>& QuestionObject, TObjectPtr<UQuestionBase>& OutQuestion);
+        void ApplyQuestionsShuffleMode();
 
-	protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Questions")
-	EShuffleMode QuestionsShuffleMode = EShuffleMode::ShuffleNone;
+        bool TryReadIntegerField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, int32& OutValue) const;
+        bool TryReadStringField(const TSharedPtr<FJsonObject>& JsonObject, const FString& FieldName, FString& OutValue) const;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Questions")
-	TArray<TObjectPtr<UQuestionBase>> Questions;
+protected:
+        UPROPERTY(BlueprintReadOnly, Category = "Questions")
+        EShuffleMode QuestionsShuffleMode = EShuffleMode::ShuffleNone;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Questions")
-	TMap<EQuestionType, TSoftObjectPtr<UDataTable>> MapsByType;
+        UPROPERTY(BlueprintReadOnly, Category = "Questions")
+        TArray<TObjectPtr<UQuestionBase>> Questions;
 
+        UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Questions")
+        TMap<EQuestionType, TSoftObjectPtr<UDataTable>> MapsByType;
+
+        UPROPERTY(BlueprintReadOnly, Category = "Questions")
+        int32 NextQuestionIndex = 0;
 };

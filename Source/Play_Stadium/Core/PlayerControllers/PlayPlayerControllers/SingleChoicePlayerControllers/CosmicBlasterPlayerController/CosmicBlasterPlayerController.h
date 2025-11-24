@@ -5,9 +5,21 @@
 #include "CosmicBlasterPlayerController.generated.h"
 
 
+class UInputMappingContext;
+
+
 UCLASS()
 class PLAY_STADIUM_API ACosmicBlasterPlayerController : public ASingleChoicePlayerControllerBase
 {
-	GENERATED_BODY()
+        GENERATED_BODY()
+
+protected:
+
+        virtual void OnPossess(APawn* InPawn) override;
+
+private:
+
+        UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+        TObjectPtr<UInputMappingContext> InputMappingContext;
 	
 };

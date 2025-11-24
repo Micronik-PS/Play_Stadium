@@ -11,16 +11,16 @@ class UInputAction;
 UCLASS()
 class PLAY_STADIUM_API AZD_BlasterGun : public APaperZDCharacter
 {
-GENERATED_BODY()
+	GENERATED_BODY()
 
-public:
-virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	public:
+	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-private:
-void MoveHorizontal(const FInputActionValue& Value);
+	private:
+	void MoveHorizontal(const FInputActionValue& Value);
 
-private:
-UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
-UInputAction* MoveAction = nullptr;
+	private:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
+	UInputAction* MoveAction = nullptr;
 
 };

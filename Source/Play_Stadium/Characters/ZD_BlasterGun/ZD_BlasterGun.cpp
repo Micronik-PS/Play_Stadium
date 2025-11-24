@@ -23,5 +23,8 @@ void AZD_BlasterGun::MoveHorizontal(const FInputActionValue& Value)
         return;
     }
 
-    AddMovementInput(FVector::ForwardVector, Direction);
+    const float TargetYaw = Direction > 0.0f ? 0.0f : 180.0f;
+    SetActorRotation(FRotator(0.0f, TargetYaw, 0.0f));
+
+    AddMovementInput(GetActorForwardVector(), 1.0f);
 }

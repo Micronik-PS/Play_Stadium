@@ -8,7 +8,7 @@ public class Play_Stadium : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-                PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Json", "UMG" });
+                PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "Json", "UMG", "EnhancedInput" });
 
                 PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
 		

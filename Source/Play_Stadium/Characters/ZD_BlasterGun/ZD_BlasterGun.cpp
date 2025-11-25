@@ -1,6 +1,7 @@
 #include "ZD_BlasterGun.h"
 
 #include "EnhancedInputComponent.h"
+#include "GameFramework/Controller.h"
 
 void AZD_BlasterGun::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -24,7 +25,13 @@ void AZD_BlasterGun::MoveHorizontal(const FInputActionValue& Value)
     }
 
     const float TargetYaw = Direction > 0.0f ? 0.0f : 180.0f;
-    SetActorRotation(FRotator(0.0f, TargetYaw, 0.0f));
+    const FRotator FacingRotation(0.0f, TargetYaw, 0.0f);
+    SetActorRotation(FacingRotation);
 
-    AddMovementInput(FVector::ForwardVector, Direction);
+    if (AController* Controller = GetController())
+    {
+        Controller->SetControlRotation(FacingRotation);
+    }
+
+    AddMovementInput(FacingRotation.Vector(), FMath::Abs(Direction));
 }

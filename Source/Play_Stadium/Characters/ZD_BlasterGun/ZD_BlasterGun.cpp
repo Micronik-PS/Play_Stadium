@@ -1,7 +1,9 @@
 #include "ZD_BlasterGun.h"
 
 #include "EnhancedInputComponent.h"
+#include "Engine/World.h"
 #include "GameFramework/Controller.h"
+#include "Kismet/GameplayStatics.h"
 
 void AZD_BlasterGun::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -12,6 +14,11 @@ void AZD_BlasterGun::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
         if (MoveAction)
         {
             EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AZD_BlasterGun::MoveHorizontal);
+        }
+
+        if (FireAction)
+        {
+            EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AZD_BlasterGun::Fire);
         }
     }
 }
@@ -34,4 +41,24 @@ void AZD_BlasterGun::MoveHorizontal(const FInputActionValue& Value)
     }
 
     AddMovementInput(FacingRotation.Vector(), FMath::Abs(Direction));
+}
+
+void AZD_BlasterGun::Fire()
+{
+    if (!ProjectileClass)
+    {
+        return;
+    }
+
+    if (UWorld* World = GetWorld())
+    {
+        const FRotator SpawnRotation = GetActorRotation();
+        const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
+
+        FActorSpawnParameters SpawnParams;
+        SpawnParams.Owner = this;
+        SpawnParams.Instigator = GetInstigator();
+
+        World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+    }
 }

@@ -28,9 +28,9 @@ void AZD_BlasterGun::MoveHorizontal(const FInputActionValue& Value)
     const FRotator FacingRotation(0.0f, TargetYaw, 0.0f);
     SetActorRotation(FacingRotation);
 
-    if (AController* Controller = GetController())
+    if (AController* LocalController = GetController())
     {
-        Controller->SetControlRotation(FacingRotation);
+        LocalController->SetControlRotation(FacingRotation);
     }
 
     AddMovementInput(FacingRotation.Vector(), FMath::Abs(Direction));

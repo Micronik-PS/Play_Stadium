@@ -4,6 +4,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
+#include "Math/RotationMatrix.h"
 
 void AZD_BlasterGun::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -52,7 +53,7 @@ void AZD_BlasterGun::Fire()
 
     if (UWorld* World = GetWorld())
     {
-        const FRotator SpawnRotation = GetActorRotation();
+        const FRotator SpawnRotation = FRotationMatrix::MakeFromX(FVector::UpVector).Rotator();
         const FVector SpawnLocation = GetActorLocation() + SpawnRotation.RotateVector(MuzzleOffset);
 
         FActorSpawnParameters SpawnParams;

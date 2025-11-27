@@ -77,3 +77,6 @@ DerivedDataCache/*
 #Custom
 Content/Developers/*
 Config/Questions.json
+.vscode/
+Play_Stadium.code-workspace
+.ignore

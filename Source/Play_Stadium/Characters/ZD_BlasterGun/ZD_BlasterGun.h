@@ -5,8 +5,11 @@
 #include "PaperZDCharacter.h"
 #include "ZD_BlasterGun.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnBlasterGunFired);
+
 class UInputAction;
 class AActor;
+class UZDA_BlasterGun;
 
 
 UCLASS()
@@ -15,7 +18,11 @@ class PLAY_STADIUM_API AZD_BlasterGun : public APaperZDCharacter
         GENERATED_BODY()
 
         public:
+        virtual void BeginPlay() override;
         virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+        UPROPERTY(BlueprintAssignable, Category = "Combat")
+        FOnBlasterGunFired OnBlasterGunFired;
 
         private:
         void MoveHorizontal(const FInputActionValue& Value);

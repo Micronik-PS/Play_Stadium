@@ -1,10 +1,26 @@
 #include "ZD_BlasterGun.h"
-
 #include "EnhancedInputComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/RotationMatrix.h"
+#include "../ZDA_BlasterGun/ZDA_BlasterGun.h"
+
+void AZD_BlasterGun::BeginPlay()
+{
+    Super::BeginPlay();
+
+    if (UPaperZDAnimInstance* ZDAnimInstance = GetAnimInstance())
+    {
+        if (UZDA_BlasterGun* BlasterGunAnimInstance = Cast<UZDA_BlasterGun>(ZDAnimInstance))
+        {
+            if (!OnBlasterGunFired.IsAlreadyBound(BlasterGunAnimInstance, &UZDA_BlasterGun::HandleBlasterGunFired))
+            {
+                OnBlasterGunFired.AddDynamic(BlasterGunAnimInstance, &UZDA_BlasterGun::HandleBlasterGunFired);
+            }
+        }
+    }
+}
 
 void AZD_BlasterGun::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -60,6 +76,9 @@ void AZD_BlasterGun::Fire()
         SpawnParams.Owner = this;
         SpawnParams.Instigator = GetInstigator();
 
-        World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams);
+        if (AActor* SpawnedProjectile = World->SpawnActor<AActor>(ProjectileClass, SpawnLocation, SpawnRotation, SpawnParams))
+        {
+            OnBlasterGunFired.Broadcast();
+        }
     }
 }

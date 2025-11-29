@@ -80,3 +80,4 @@ Config/Questions.json
 .vscode/
 Play_Stadium.code-workspace
 .ignore
+GenerateProjectFiles.bat

@@ -11,6 +11,8 @@
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Engine/EngineTypes.h"
+#include "GameFramework/PlayerController.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Styling/CoreStyle.h"
 #include "Styling/SlateBrush.h"
@@ -228,10 +230,19 @@ UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, TObjectPtr<UText
 
 void UStartMenuWidget::HandleStartTestClicked()
 {
-        if (!GetWorld())
-        {
-                return;
-        }
+	if (APlayerController* OwningPlayer = GetOwningPlayer())
+	{
+		FInputModeGameOnly InputMode;
+		OwningPlayer->SetInputMode(InputMode);
+		OwningPlayer->bShowMouseCursor = false;
+		OwningPlayer->bEnableClickEvents = false;
+		OwningPlayer->bEnableMouseOverEvents = false;
+	}
+
+	if (!GetWorld())
+	{
+		return;
+	}
 
         if (UPlayStadiumGameInstance* PlayStadiumGameInstance = GetWorld()->GetGameInstance<UPlayStadiumGameInstance>())
         {

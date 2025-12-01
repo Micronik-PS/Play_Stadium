@@ -2,7 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Engine/EngineTypes.h"
-#include "Play_Stadium/Core/UI/StartMenuWidget.h"
+#include "Play_Stadium/Core/UI/StartMenuWidget/StartMenuWidget.h"
 
 
 void AStartPlayerController::BeginPlay()

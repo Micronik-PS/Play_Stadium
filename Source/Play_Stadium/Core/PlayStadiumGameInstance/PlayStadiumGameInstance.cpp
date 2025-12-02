@@ -54,8 +54,12 @@ void UPlayStadiumGameInstance::HandleStartTestRequested()
                 return;
         }
 
-        const TObjectPtr<UQuestionBase> CurrentQuestion = Questions[NextQuestionIndex];
-        ++NextQuestionIndex;
+        TObjectPtr<UQuestionBase> CurrentQuestion;
+        if (!TryConsumeNextQuestion(CurrentQuestion))
+        {
+                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: failed to consume next question."));
+                return;
+        }
 
         if (!CurrentQuestion)
         {
@@ -467,4 +471,45 @@ bool UPlayStadiumGameInstance::TryReadStringField(const TSharedPtr<FJsonObject>&
 	}
 
 	return JsonObject->TryGetStringField(FieldName, OutValue);
+}
+
+void UPlayStadiumGameInstance::AddScore(int32 Delta)
+{
+	CurrentScore = FMath::Max(0, CurrentScore + Delta);
+}
+
+TObjectPtr<UQuestionBase> UPlayStadiumGameInstance::GetCurrentQuestion() const
+{
+	const int32 CurrentIndex = NextQuestionIndex - 1;
+	if (Questions.IsValidIndex(CurrentIndex))
+	{
+		return Questions[CurrentIndex];
+	}
+
+	return nullptr;
+}
+
+TObjectPtr<UQuestionBase> UPlayStadiumGameInstance::GetQuestionAtIndex(int32 QuestionIndex) const
+{
+	if (Questions.IsValidIndex(QuestionIndex))
+	{
+		return Questions[QuestionIndex];
+	}
+
+	return nullptr;
+}
+
+bool UPlayStadiumGameInstance::TryConsumeNextQuestion(TObjectPtr<UQuestionBase>& OutQuestion)
+{
+	OutQuestion = nullptr;
+
+	if (!Questions.IsValidIndex(NextQuestionIndex))
+	{
+		return false;
+	}
+
+	OutQuestion = Questions[NextQuestionIndex];
+	++NextQuestionIndex;
+
+	return OutQuestion != nullptr;
 }

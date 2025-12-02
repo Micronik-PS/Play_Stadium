@@ -36,6 +36,7 @@ ACosmicBlasterQuestionBanner::ACosmicBlasterQuestionBanner()
 	QuestionTextComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	QuestionTextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 	QuestionTextComponent->SetMobility(EComponentMobility::Static);
+	QuestionTextComponent->SetRelativeLocation(FVector(0.0f, TextDepthOffset, 0.0f));
 
 	CounterTextComponent = CreateDefaultSubobject<UTextRenderComponent>(TEXT("CounterText"));
 	CounterTextComponent->SetupAttachment(RootComponent);
@@ -46,6 +47,7 @@ ACosmicBlasterQuestionBanner::ACosmicBlasterQuestionBanner()
 	CounterTextComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CounterTextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 	CounterTextComponent->SetMobility(EComponentMobility::Static);
+	CounterTextComponent->SetRelativeLocation(FVector(CounterOffset, TextDepthOffset, 0.0f));
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> UnlitTextMat(TEXT("/Engine/EngineMaterials/DefaultTextMaterialOpaque"));
 	if (UnlitTextMat.Succeeded())
@@ -53,12 +55,15 @@ ACosmicBlasterQuestionBanner::ACosmicBlasterQuestionBanner()
 		QuestionTextComponent->SetTextMaterial(UnlitTextMat.Object);
 		CounterTextComponent->SetTextMaterial(UnlitTextMat.Object);
 	}
+
+	ApplyLayout();
 }
 
 void ACosmicBlasterQuestionBanner::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	ApplyLayout();
 	UpdateVisuals();
 }
 
@@ -80,6 +85,20 @@ void ACosmicBlasterQuestionBanner::UpdateVisuals()
 	if (QuestionTextComponent)
 	{
 		QuestionTextComponent->SetText(QuestionText);
+	}
+
+	if (CounterTextComponent)
+	{
+		const FString CounterString = FString::Printf(TEXT("%d/%d"), CurrentValue, TotalValue);
+		CounterTextComponent->SetText(FText::FromString(CounterString));
+		CounterTextComponent->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
+	}
+}
+
+void ACosmicBlasterQuestionBanner::ApplyLayout()
+{
+	if (QuestionTextComponent)
+	{
 		QuestionTextComponent->SetRelativeLocation(FVector(0.0f, TextDepthOffset, 0.0f));
 		QuestionTextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 		QuestionTextComponent->SetWorldSize(DefaultTextWorldSize);
@@ -87,11 +106,8 @@ void ACosmicBlasterQuestionBanner::UpdateVisuals()
 
 	if (CounterTextComponent)
 	{
-		const FString CounterString = FString::Printf(TEXT("%d/%d"), CurrentValue, TotalValue);
-		CounterTextComponent->SetText(FText::FromString(CounterString));
 		CounterTextComponent->SetRelativeLocation(FVector(CounterOffset, TextDepthOffset, 0.0f));
 		CounterTextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
-		CounterTextComponent->SetHorizontalAlignment(EHorizTextAligment::EHTA_Center);
 		CounterTextComponent->SetWorldSize(DefaultTextWorldSize);
 	}
 

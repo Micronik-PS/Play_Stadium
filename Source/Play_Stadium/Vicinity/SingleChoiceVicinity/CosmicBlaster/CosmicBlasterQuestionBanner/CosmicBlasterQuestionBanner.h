@@ -43,6 +43,7 @@ protected:
 
 private:
 	void UpdateVisuals();
+	void ApplyLayout();
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Banner|Content", meta = (AllowPrivateAccess = "true"))
 	FText QuestionText = FText::FromString(TEXT("TEXT"));

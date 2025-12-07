@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Play_Stadium/Maps/PlayStadiumLevelBase.h"
 #include "Play_Stadium/Targets/CosmicBubble/CosmicBubble.h"
-#include "Play_Stadium/Vicinity/SingleChoiceVicinity/CosmicBlaster/CosmicBlasterQuestionBanner/CosmicBlasterQuestionBanner.h"
+#include "Play_Stadium/Vicinity/CosmicBlasterQuestionBanner/CosmicBlasterQuestionBanner.h"
 #include "Play_Stadium/Core/Questions/SingleChoiceQuestion/SingleChoiceQuestionData.h"
 
 #include "CosmicBlasterLevel.generated.h"

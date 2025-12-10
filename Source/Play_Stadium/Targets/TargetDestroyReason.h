@@ -7,5 +7,6 @@ UENUM(BlueprintType)
 enum class ETargetDestroyReason : uint8
 {
 	FromDestinationPoint UMETA(DisplayName = "FromDestinationPoint"),
-	FromPlayerAttack     UMETA(DisplayName = "FromPlayerAttack")
+	FromPlayerAttack     UMETA(DisplayName = "FromPlayerAttack"),
+	FromPlayerAction     UMETA(DisplayName = "FromPlayerAction")
 };

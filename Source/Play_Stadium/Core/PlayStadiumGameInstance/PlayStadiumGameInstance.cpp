@@ -23,10 +23,8 @@
 #include "Play_Stadium/Core/Data/QuestionMapListData/QuestionMapListData.h"
 
 
-namespace
-{
-	constexpr TCHAR QuestionsDefinitionFileName[] = TEXT("Questions.json");
-}
+
+constexpr TCHAR QuestionsDefinitionFileName[] = TEXT("Questions.json");
 
 
 DEFINE_LOG_CATEGORY_STATIC(LogPlayStadiumGameInstance, Log, All);

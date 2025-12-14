@@ -25,76 +25,71 @@
 #include "Play_Stadium/Core/Questions/SingleChoiceQuestion/SingleChoiceQuestion.h"
 #include "Play_Stadium/Core/Questions/TextInputQuestion/TextInputQuestion.h"
 
-namespace
+
+int32 GetRewardForQuestion(const UQuestionBase* Question)
 {
-	int32 GetRewardForQuestion(const UQuestionBase* Question)
+	if (!Question)
 	{
-		if (!Question)
-		{
-			return 0;
-		}
-
-		switch (Question->GetType())
-		{
-		case EQuestionType::SingleChoiceQuestion:
-			if (const USingleChoiceQuestion* SingleChoice = Cast<USingleChoiceQuestion>(Question))
-			{
-				return SingleChoice->GetQuestionData().GetReward();
-			}
-			break;
-
-		case EQuestionType::MultipleChoiceQuestion:
-			if (const UMultipleChoiceQuestion* MultipleChoice = Cast<UMultipleChoiceQuestion>(Question))
-			{
-				return MultipleChoice->GetQuestionData().GetReward();
-			}
-			break;
-
-		case EQuestionType::TextInputQuestion:
-			if (const UTextInputQuestion* TextInput = Cast<UTextInputQuestion>(Question))
-			{
-				return TextInput->GetQuestionData().GetReward();
-			}
-			break;
-
-		case EQuestionType::MatchingQuestion:
-			if (const UMatchingQuestion* Matching = Cast<UMatchingQuestion>(Question))
-			{
-				return Matching->GetQuestionData().GetReward();
-			}
-			break;
-
-		default:
-			break;
-		}
-
 		return 0;
 	}
 
-	int32 CalculateMaximumScore(const UPlayStadiumGameInstance* GameInstance)
+	switch (Question->GetType())
 	{
-		if (!GameInstance)
+	case EQuestionType::SingleChoiceQuestion:
+		if (const USingleChoiceQuestion* SingleChoice = Cast<USingleChoiceQuestion>(Question))
 		{
-			return 0;
+			return SingleChoice->GetQuestionData().GetReward();
 		}
+		break;
 
-		int32 TotalScore = 0;
-		for (const TObjectPtr<UQuestionBase>& Question : GameInstance->GetQuestions())
+	case EQuestionType::MultipleChoiceQuestion:
+		if (const UMultipleChoiceQuestion* MultipleChoice = Cast<UMultipleChoiceQuestion>(Question))
 		{
-			TotalScore += GetRewardForQuestion(Question.Get());
+			return MultipleChoice->GetQuestionData().GetReward();
 		}
+		break;
 
-		return TotalScore;
+	case EQuestionType::TextInputQuestion:
+		if (const UTextInputQuestion* TextInput = Cast<UTextInputQuestion>(Question))
+		{
+			return TextInput->GetQuestionData().GetReward();
+		}
+		break;
+
+	case EQuestionType::MatchingQuestion:
+		if (const UMatchingQuestion* Matching = Cast<UMatchingQuestion>(Question))
+		{
+			return Matching->GetQuestionData().GetReward();
+		}
+		break;
+
+	default:
+		break;
 	}
+
+	return 0;
 }
 
-namespace
+int32 CalculateMaximumScore(const UPlayStadiumGameInstance* GameInstance)
 {
-	constexpr float ContentWidth = 560.0f;
-	constexpr float ContentPadding = 28.0f;
-	constexpr float ButtonHeight = 60.0f;
-	constexpr float TitleSpacing = 22.0f;
+	if (!GameInstance)
+	{
+		return 0;
+	}
+
+	int32 TotalScore = 0;
+	for (const TObjectPtr<UQuestionBase>& Question : GameInstance->GetQuestions())
+	{
+		TotalScore += GetRewardForQuestion(Question.Get());
+	}
+
+	return TotalScore;
 }
+
+constexpr float ContentWidth = 560.0f;
+constexpr float ContentPadding = 28.0f;
+constexpr float ButtonHeight = 60.0f;
+constexpr float TitleSpacing = 22.0f;
 
 TSharedRef<SWidget> UResultMenuWidget::RebuildWidget()
 {

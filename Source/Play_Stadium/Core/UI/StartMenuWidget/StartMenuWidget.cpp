@@ -21,15 +21,13 @@
 
 #include "Play_Stadium/Core/PlayStadiumGameInstance/PlayStadiumGameInstance.h"
 
-namespace
-{
-        constexpr float ContentWidth = 640.0f;
-        constexpr float ContentPadding = 36.0f;
-        constexpr float ButtonHeight = 64.0f;
-        constexpr float ButtonPadding = 12.0f;
-        constexpr float SpacingAfterTitle = 28.0f;
-        constexpr float SpacingBetweenButtons = 20.0f;
-}
+
+constexpr float ContentWidth = 640.0f;
+constexpr float ContentPadding = 36.0f;
+constexpr float ButtonHeight = 64.0f;
+constexpr float ButtonPadding = 12.0f;
+constexpr float SpacingAfterTitle = 28.0f;
+constexpr float SpacingBetweenButtons = 20.0f;
 
 TSharedRef<SWidget> UStartMenuWidget::RebuildWidget()
 {

@@ -42,17 +42,22 @@ void UPlayStadiumGameInstance::Init()
 
 void UPlayStadiumGameInstance::HandleStartTestRequested()
 {
-        if (Questions.IsEmpty())
-        {
-                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: questions list is empty."));
-                return;
-        }
+	if (Questions.IsEmpty())
+	{
+		UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: questions list is empty."));
+		return;
+	}
 
-        if (NextQuestionIndex >= Questions.Num())
-        {
-                UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: all questions have already been used."));
-                return;
-        }
+	if (NextQuestionIndex >= Questions.Num())
+	{
+		if (TryOpenResultLevel())
+		{
+			return;
+		}
+
+		UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Cannot start test: all questions have already been used and result level is not available."));
+		return;
+	}
 
         TObjectPtr<UQuestionBase> CurrentQuestion;
         if (!TryConsumeNextQuestion(CurrentQuestion))
@@ -442,6 +447,24 @@ bool UPlayStadiumGameInstance::TryParseQuestionObject(const TSharedPtr<FJsonObje
 	}
 
 	return false;
+}
+
+
+bool UPlayStadiumGameInstance::TryOpenResultLevel()
+{
+	if (!ResultLevel.IsValid())
+	{
+		ResultLevel.LoadSynchronous();
+	}
+
+	if (!ResultLevel.IsValid())
+	{
+		UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Result level is not configured or failed to load."));
+		return false;
+	}
+
+	UGameplayStatics::OpenLevelBySoftObjectPtr(this, ResultLevel);
+	return true;
 }
 
 

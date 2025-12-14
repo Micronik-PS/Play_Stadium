@@ -37,6 +37,7 @@ public:
 	TObjectPtr<UQuestionBase> GetCurrentQuestion() const;
 	TObjectPtr<UQuestionBase> GetQuestionAtIndex(int32 QuestionIndex) const;
 	bool TryConsumeNextQuestion(TObjectPtr<UQuestionBase>& OutQuestion);
+	bool TryOpenResultLevel();
 
 protected:
     void LoadQuestionsFromJson();
@@ -61,4 +62,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly, Category = "Score")
 	int32 CurrentScore = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Levels")
+	TSoftObjectPtr<UWorld> ResultLevel;
 };

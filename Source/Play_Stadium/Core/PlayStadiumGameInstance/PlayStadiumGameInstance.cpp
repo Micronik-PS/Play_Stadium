@@ -2,6 +2,7 @@
 
 #include "Algo/RandomShuffle.h"
 #include "Algo/Sort.h"
+#include "Engine/Engine.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
 #include "Misc/FileHelper.h"
@@ -33,6 +34,11 @@ DEFINE_LOG_CATEGORY_STATIC(LogPlayStadiumGameInstance, Log, All);
 void UPlayStadiumGameInstance::Init()
 {
         Super::Init();
+
+        if (GEngine)
+        {
+                GEngine->SetMaxFPS(60.0f);
+        }
 
         LoadQuestionsFromJson();
         ApplyQuestionsShuffleMode();

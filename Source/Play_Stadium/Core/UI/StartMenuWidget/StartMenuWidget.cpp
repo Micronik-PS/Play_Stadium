@@ -22,10 +22,10 @@
 #include "Play_Stadium/Core/PlayStadiumGameInstance/PlayStadiumGameInstance.h"
 
 
-constexpr float ContentWidth = 640.0f;
-constexpr float ContentPadding = 36.0f;
-constexpr float ButtonHeight = 64.0f;
-constexpr float ButtonPadding = 12.0f;
+constexpr float StartMenuContentWidth = 640.0f;
+constexpr float StartMenuContentPadding = 36.0f;
+constexpr float StartMenuButtonHeight = 64.0f;
+constexpr float StartMenuButtonPadding = 12.0f;
 constexpr float SpacingAfterTitle = 28.0f;
 constexpr float SpacingBetweenButtons = 20.0f;
 
@@ -86,7 +86,7 @@ void UStartMenuWidget::BuildLayout()
 
         ContentBorder = WidgetTree->ConstructWidget<UBorder>(UBorder::StaticClass(), TEXT("ContentBorder"));
         ContentBorder->SetBrushColor(FLinearColor(0.06f, 0.08f, 0.15f, 0.95f));
-        ContentBorder->SetPadding(FMargin(ContentPadding));
+        ContentBorder->SetPadding(FMargin(StartMenuContentPadding));
         ContentBorder->SetDesiredSizeScale(FVector2D(1.0f, 1.0f));
 
         if (UCanvasPanelSlot* BorderSlot = RootCanvas->AddChildToCanvas(ContentBorder))
@@ -97,7 +97,7 @@ void UStartMenuWidget::BuildLayout()
         }
 
         ContentSizeBox = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ContentSizeBox"));
-        ContentSizeBox->SetWidthOverride(ContentWidth);
+        ContentSizeBox->SetWidthOverride(StartMenuContentWidth);
         ContentSizeBox->SetMinDesiredHeight(400.0f);
         ContentBorder->SetContent(ContentSizeBox);
 
@@ -131,7 +131,7 @@ void UStartMenuWidget::BuildLayout()
         if (StartTestButton)
         {
                 USizeBox* StartButtonContainer = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("StartButtonContainer"));
-                StartButtonContainer->SetHeightOverride(ButtonHeight);
+                StartButtonContainer->SetHeightOverride(StartMenuButtonHeight);
                 StartButtonContainer->SetContent(StartTestButton);
 
                 if (UVerticalBoxSlot* StartButtonSlot = VerticalBox->AddChildToVerticalBox(StartButtonContainer))
@@ -145,7 +145,7 @@ void UStartMenuWidget::BuildLayout()
         if (ExitButton)
         {
                 USizeBox* ExitButtonContainer = WidgetTree->ConstructWidget<USizeBox>(USizeBox::StaticClass(), TEXT("ExitButtonContainer"));
-                ExitButtonContainer->SetHeightOverride(ButtonHeight);
+                ExitButtonContainer->SetHeightOverride(StartMenuButtonHeight);
                 ExitButtonContainer->SetContent(ExitButton);
 
                 if (UVerticalBoxSlot* ExitButtonSlot = VerticalBox->AddChildToVerticalBox(ExitButtonContainer))
@@ -207,8 +207,8 @@ UButton* UStartMenuWidget::CreateMenuButton(const FText& Label, TObjectPtr<UText
         PressedBrush.TintColor = FSlateColor(FLinearColor(0.02f, 0.2f, 0.42f, 1.0f));
         ButtonStyle.Pressed = PressedBrush;
 
-        ButtonStyle.NormalPadding = FMargin(ButtonPadding);
-        ButtonStyle.PressedPadding = FMargin(ButtonPadding);
+        ButtonStyle.NormalPadding = FMargin(StartMenuButtonPadding);
+        ButtonStyle.PressedPadding = FMargin(StartMenuButtonPadding);
         Button->SetStyle(ButtonStyle);
 
         OutLabel = WidgetTree->ConstructWidget<UTextBlock>(UTextBlock::StaticClass());

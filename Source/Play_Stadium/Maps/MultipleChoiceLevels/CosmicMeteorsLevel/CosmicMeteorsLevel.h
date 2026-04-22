@@ -26,7 +26,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CosmicMeteors")
 	void ApplyQuestionData(const FMultipleChoiceQuestionData& QuestionData, int32 CurrentQuestionIndex = 1, int32 TotalQuestions = 1);
 
-	TArray<FMeteorDestroyedSignature*> GetMeteorDestroyedDelegates() const;
+	TArray<AMeteor*> GetMeteors() const;
 
 	UFUNCTION(BlueprintCallable, Category = "CosmicMeteors")
 	void RespawnMeteors();

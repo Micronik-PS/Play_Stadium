@@ -24,19 +24,19 @@ void ACosmicBlasterLevel::ApplyQuestionData(const FSingleChoiceQuestionData& Que
 	UpdateQuestionBanner(QuestionData, CurrentQuestionIndex, TotalQuestions);
 }
 
-TArray<FCosmicBubbleDestroyedSignature*> ACosmicBlasterLevel::GetBubbleDestroyedDelegates() const
+TArray<ACosmicBubble*> ACosmicBlasterLevel::GetBubbles() const
 {
-	TArray<FCosmicBubbleDestroyedSignature*> Delegates;
+	TArray<ACosmicBubble*> AliveBubbles;
 
 	for (ACosmicBubble* Bubble : Bubbles)
 	{
-		if (Bubble)
+		if (IsValid(Bubble))
 		{
-			Delegates.Add(&Bubble->OnBubbleDestroyed);
+			AliveBubbles.Add(Bubble);
 		}
 	}
 
-	return Delegates;
+	return AliveBubbles;
 }
 
 void ACosmicBlasterLevel::RespawnBubbles()

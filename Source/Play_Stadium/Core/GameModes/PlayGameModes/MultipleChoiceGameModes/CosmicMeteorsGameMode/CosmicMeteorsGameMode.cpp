@@ -5,6 +5,7 @@
 #include "Play_Stadium/Core/Questions/MultipleChoiceQuestion/MultipleChoiceQuestion.h"
 #include "Play_Stadium/Core/Questions/QuestionBase.h"
 #include "Play_Stadium/Maps/MultipleChoiceLevels/CosmicMeteorsLevel/CosmicMeteorsLevel.h"
+#include "Play_Stadium/Targets/Meteor/Meteor.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCosmicMeteorsGameMode, Log, All);
 
@@ -105,9 +106,9 @@ void ACosmicMeteorsGameMode::ApplyQuestionToLevel(const FMultipleChoiceQuestionD
 
 	Level->ApplyQuestionData(QuestionData, CurrentQuestionIndex, GameInstance->GetTotalQuestionsCount());
 
-	const TArray<FMeteorDestroyedSignature*> Delegates = Level->GetMeteorDestroyedDelegates();
-	ResetProgressCounters(Delegates.Num());
-	BindMeteorDelegates(Delegates);
+	const TArray<AMeteor*> Meteors = Level->GetMeteors();
+	ResetProgressCounters(Meteors.Num());
+	BindMeteorDelegates(Meteors);
 }
 
 UPlayStadiumGameInstance* ACosmicMeteorsGameMode::GetPlayStadiumGameInstance() const
@@ -150,9 +151,9 @@ void ACosmicMeteorsGameMode::AdvanceAfterScoring(ETargetDestroyReason DestroyRea
 				Level->RespawnMeteors();
 				Level->ApplyQuestionData(NewQuestionData, GameInstance->GetNextQuestionIndex(), GameInstance->GetTotalQuestionsCount());
 
-				const TArray<FMeteorDestroyedSignature*> Delegates = Level->GetMeteorDestroyedDelegates();
-				ResetProgressCounters(Delegates.Num());
-				BindMeteorDelegates(Delegates);
+				const TArray<AMeteor*> Meteors = Level->GetMeteors();
+				ResetProgressCounters(Meteors.Num());
+				BindMeteorDelegates(Meteors);
 
 				CurrentQuestionData = NewQuestionData;
 				bHasActiveQuestion = true;
@@ -165,29 +166,32 @@ void ACosmicMeteorsGameMode::AdvanceAfterScoring(ETargetDestroyReason DestroyRea
 	GameInstance->HandleStartTestRequested();
 }
 
-void ACosmicMeteorsGameMode::BindMeteorDelegates(const TArray<FMeteorDestroyedSignature*>& Delegates)
+void ACosmicMeteorsGameMode::BindMeteorDelegates(const TArray<AMeteor*>& Meteors)
 {
-	CachedMeteorDelegates = Delegates;
-	for (FMeteorDestroyedSignature* Delegate : CachedMeteorDelegates)
+	CachedMeteors.Reset();
+	CachedMeteors.Reserve(Meteors.Num());
+
+	for (AMeteor* Meteor : Meteors)
 	{
-		if (Delegate)
+		if (IsValid(Meteor))
 		{
-			Delegate->AddDynamic(this, &ACosmicMeteorsGameMode::HandleMeteorDestroyed);
+			Meteor->OnMeteorDestroyed.AddUniqueDynamic(this, &ACosmicMeteorsGameMode::HandleMeteorDestroyed);
+			CachedMeteors.Add(Meteor);
 		}
 	}
 }
 
 void ACosmicMeteorsGameMode::UnbindMeteorDelegates()
 {
-	for (FMeteorDestroyedSignature* Delegate : CachedMeteorDelegates)
+	for (TWeakObjectPtr<AMeteor>& MeteorPtr : CachedMeteors)
 	{
-		if (Delegate)
+		if (AMeteor* Meteor = MeteorPtr.Get())
 		{
-			Delegate->RemoveDynamic(this, &ACosmicMeteorsGameMode::HandleMeteorDestroyed);
+			Meteor->OnMeteorDestroyed.RemoveDynamic(this, &ACosmicMeteorsGameMode::HandleMeteorDestroyed);
 		}
 	}
 
-	CachedMeteorDelegates.Reset();
+	CachedMeteors.Reset();
 }
 
 void ACosmicMeteorsGameMode::ResetProgressCounters(int32 MeteorCount)

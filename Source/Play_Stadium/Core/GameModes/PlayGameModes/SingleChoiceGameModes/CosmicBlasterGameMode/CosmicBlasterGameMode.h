@@ -7,8 +7,8 @@
 #include "CosmicBlasterGameMode.generated.h"
 
 class ACosmicBlasterLevel;
+class ACosmicBubble;
 class UPlayStadiumGameInstance;
-class FCosmicBubbleDestroyedSignature;
 
 UCLASS()
 class PLAY_STADIUM_API ACosmicBlasterGameMode : public ASingleChoiceGameModeBase
@@ -26,13 +26,13 @@ private:
 	UPlayStadiumGameInstance* GetPlayStadiumGameInstance() const;
 	ACosmicBlasterLevel* GetCosmicBlasterLevel() const;
 	void AdvanceToNextQuestion(ETargetDestroyReason DestroyReason);
-	void BindBubbleDelegates(const TArray<FCosmicBubbleDestroyedSignature*>& Delegates);
+	void BindBubbleDelegates(const TArray<ACosmicBubble*>& Bubbles);
 	void UnbindBubbleDelegates();
 
 	UFUNCTION()
 	void HandleBubbleDestroyed(ETargetDestroyReason DestroyReason, bool bWasCorrectChoice);
 
-	TArray<FCosmicBubbleDestroyedSignature*> CachedBubbleDelegates;
+	TArray<TWeakObjectPtr<ACosmicBubble>> CachedBubbles;
 	FSingleChoiceQuestionData CurrentQuestionData;
 	bool bHasActiveQuestion = false;
 	bool bHasReceivedAnswer = false;

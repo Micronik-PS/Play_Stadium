@@ -43,14 +43,14 @@ void ACosmicButton::OnConstruction(const FTransform& Transform)
 
 void ACosmicButton::ActivateButton()
 {
-	TArray<AMeteor*> TargetMeteors;
+	TArray<TWeakObjectPtr<AMeteor>> TargetMeteors;
 	if (const UWorld* World = GetWorld())
 	{
 		for (TActorIterator<AMeteor> It(World); It; ++It)
 		{
 			if (AMeteor* MeteorActor = *It)
 			{
-				if (!MeteorActor->IsActorBeingDestroyed() && !MeteorActor->IsPendingKill())
+				if (IsValid(MeteorActor) && !MeteorActor->IsActorBeingDestroyed())
 				{
 					TargetMeteors.Add(MeteorActor);
 				}
@@ -58,11 +58,14 @@ void ACosmicButton::ActivateButton()
 		}
 	}
 
-	for (AMeteor* Meteor : TargetMeteors)
+	for (const TWeakObjectPtr<AMeteor>& MeteorPtr : TargetMeteors)
 	{
-		if (Meteor)
+		if (AMeteor* Meteor = MeteorPtr.Get())
 		{
-			Meteor->TriggerDestruction(ETargetDestroyReason::FromPlayerAction);
+			if (!Meteor->IsActorBeingDestroyed())
+			{
+				Meteor->TriggerDestruction(ETargetDestroyReason::FromPlayerAction);
+			}
 		}
 	}
 }

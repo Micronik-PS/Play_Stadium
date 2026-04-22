@@ -7,8 +7,8 @@
 #include "CosmicMeteorsGameMode.generated.h"
 
 class ACosmicMeteorsLevel;
+class AMeteor;
 class UPlayStadiumGameInstance;
-class FMeteorDestroyedSignature;
 
 
 UCLASS()
@@ -27,7 +27,7 @@ private:
 	UPlayStadiumGameInstance* GetPlayStadiumGameInstance() const;
 	ACosmicMeteorsLevel* GetCosmicMeteorsLevel() const;
 	void AdvanceAfterScoring(ETargetDestroyReason DestroyReason);
-	void BindMeteorDelegates(const TArray<FMeteorDestroyedSignature*>& Delegates);
+	void BindMeteorDelegates(const TArray<AMeteor*>& Meteors);
 	void UnbindMeteorDelegates();
 	void ResetProgressCounters(int32 MeteorCount);
 	void CalculateAndApplyScore(ETargetDestroyReason DestroyReason);
@@ -36,7 +36,7 @@ private:
 	void HandleMeteorDestroyed(ETargetDestroyReason DestroyReason, bool bWasCorrectChoice);
 
 private:
-	TArray<FMeteorDestroyedSignature*> CachedMeteorDelegates;
+	TArray<TWeakObjectPtr<AMeteor>> CachedMeteors;
 	FMultipleChoiceQuestionData CurrentQuestionData;
 	int32 TotalMeteorCount = 0;
 	int32 DestroyedMeteorCount = 0;

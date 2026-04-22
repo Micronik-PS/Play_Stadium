@@ -4,6 +4,7 @@
 #include "Play_Stadium/Maps/SingleChoiceLevels/CosmicBlasterLevel/CosmicBlasterLevel.h"
 #include "Play_Stadium/Core/Questions/QuestionBase.h"
 #include "Play_Stadium/Core/Questions/SingleChoiceQuestion/SingleChoiceQuestion.h"
+#include "Play_Stadium/Targets/CosmicBubble/CosmicBubble.h"
 #include "Engine/World.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogCosmicBlasterGameMode, Log, All);
@@ -103,7 +104,7 @@ void ACosmicBlasterGameMode::ApplyQuestionToLevel(const FSingleChoiceQuestionDat
 	CurrentQuestionData = QuestionData;
 
 	Level->ApplyQuestionData(QuestionData, CurrentQuestionIndex, GameInstance->GetTotalQuestionsCount());
-	BindBubbleDelegates(Level->GetBubbleDestroyedDelegates());
+	BindBubbleDelegates(Level->GetBubbles());
 }
 
 UPlayStadiumGameInstance* ACosmicBlasterGameMode::GetPlayStadiumGameInstance() const
@@ -154,29 +155,32 @@ void ACosmicBlasterGameMode::AdvanceToNextQuestion(ETargetDestroyReason DestroyR
 	GameInstance->HandleStartTestRequested();
 }
 
-void ACosmicBlasterGameMode::BindBubbleDelegates(const TArray<FCosmicBubbleDestroyedSignature*>& Delegates)
+void ACosmicBlasterGameMode::BindBubbleDelegates(const TArray<ACosmicBubble*>& Bubbles)
 {
-	CachedBubbleDelegates = Delegates;
-	for (FCosmicBubbleDestroyedSignature* Delegate : CachedBubbleDelegates)
+	CachedBubbles.Reset();
+	CachedBubbles.Reserve(Bubbles.Num());
+
+	for (ACosmicBubble* Bubble : Bubbles)
 	{
-		if (Delegate)
+		if (IsValid(Bubble))
 		{
-			Delegate->AddDynamic(this, &ACosmicBlasterGameMode::HandleBubbleDestroyed);
+			Bubble->OnBubbleDestroyed.AddUniqueDynamic(this, &ACosmicBlasterGameMode::HandleBubbleDestroyed);
+			CachedBubbles.Add(Bubble);
 		}
 	}
 }
 
 void ACosmicBlasterGameMode::UnbindBubbleDelegates()
 {
-	for (FCosmicBubbleDestroyedSignature* Delegate : CachedBubbleDelegates)
+	for (TWeakObjectPtr<ACosmicBubble>& BubblePtr : CachedBubbles)
 	{
-		if (Delegate)
+		if (ACosmicBubble* Bubble = BubblePtr.Get())
 		{
-			Delegate->RemoveDynamic(this, &ACosmicBlasterGameMode::HandleBubbleDestroyed);
+			Bubble->OnBubbleDestroyed.RemoveDynamic(this, &ACosmicBlasterGameMode::HandleBubbleDestroyed);
 		}
 	}
 
-	CachedBubbleDelegates.Reset();
+	CachedBubbles.Reset();
 }
 
 void ACosmicBlasterGameMode::HandleBubbleDestroyed(ETargetDestroyReason DestroyReason, bool bWasCorrectChoice)

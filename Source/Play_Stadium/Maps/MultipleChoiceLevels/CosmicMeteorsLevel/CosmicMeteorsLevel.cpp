@@ -26,19 +26,19 @@ void ACosmicMeteorsLevel::ApplyQuestionData(const FMultipleChoiceQuestionData& Q
 	UpdateQuestionBanner(QuestionData, CurrentQuestionIndex, TotalQuestions);
 }
 
-TArray<FMeteorDestroyedSignature*> ACosmicMeteorsLevel::GetMeteorDestroyedDelegates() const
+TArray<AMeteor*> ACosmicMeteorsLevel::GetMeteors() const
 {
-	TArray<FMeteorDestroyedSignature*> Delegates;
+	TArray<AMeteor*> AliveMeteors;
 
 	for (AMeteor* Meteor : Meteors)
 	{
-		if (Meteor)
+		if (IsValid(Meteor))
 		{
-			Delegates.Add(&Meteor->OnMeteorDestroyed);
+			AliveMeteors.Add(Meteor);
 		}
 	}
 
-	return Delegates;
+	return AliveMeteors;
 }
 
 void ACosmicMeteorsLevel::RespawnMeteors()

@@ -25,7 +25,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "CosmicBlaster")
 	void ApplyQuestionData(const FSingleChoiceQuestionData& QuestionData, int32 CurrentQuestionIndex = 1, int32 TotalQuestions = 1);
 
-	TArray<FCosmicBubbleDestroyedSignature*> GetBubbleDestroyedDelegates() const;
+	TArray<ACosmicBubble*> GetBubbles() const;
 
 	UFUNCTION(BlueprintCallable, Category = "CosmicBlaster")
 	void RespawnBubbles();

@@ -50,7 +50,7 @@ void UCosmicBubbleTextWidget::SetFontSize(int32 InFontSize)
 
 	if (BubbleTextBlock)
 	{
-		FSlateFontInfo FontInfo = BubbleTextBlock->Font;
+		FSlateFontInfo FontInfo = BubbleTextBlock->GetFont();
 		FontInfo.Size = CurrentFontSize;
 		BubbleTextBlock->SetFont(FontInfo);
 	}

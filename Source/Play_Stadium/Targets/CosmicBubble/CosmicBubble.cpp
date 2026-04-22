@@ -162,8 +162,8 @@ void ACosmicBubble::HandleBubbleImpact(AActor* OtherActor)
 		? ETargetDestroyReason::FromPlayerAttack
 		: ETargetDestroyReason::FromDestinationPoint;
 
-	OnBubbleDestroyed.Broadcast(DestroyReason, bIsCorrectChoice);
 	bHasBeenDestroyed = true;
+	OnBubbleDestroyed.Broadcast(DestroyReason, bIsCorrectChoice);
 	Destroy();
 }
 

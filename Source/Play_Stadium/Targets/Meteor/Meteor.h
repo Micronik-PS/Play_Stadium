@@ -41,6 +41,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Meteor|Movement")
 	void SetMovementSpeed(float InSpeed);
 
+	UFUNCTION(BlueprintPure, Category = "Meteor|Movement")
+	float GetMinimumMovementSpeed() const;
+
 	FTransform GetTextWidgetRelativeTransform() const;
 	void SetTextWidgetRelativeTransform(const FTransform& InTransform);
 

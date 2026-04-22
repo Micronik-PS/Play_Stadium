@@ -41,6 +41,7 @@ private:
 	void ConfigureMeteorSpeeds(const FMultipleChoiceQuestionData& QuestionData);
 	float CalculateBaseSpeedFromTimeLimit(AMeteor* Meteor, int32 TimeLimitInSeconds) const;
 	float FindDistanceAhead(const AMeteor* Meteor) const;
+	float FindDistanceToClosestFighter(const AMeteor* Meteor) const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CosmicMeteors", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<AMeteor>> Meteors;

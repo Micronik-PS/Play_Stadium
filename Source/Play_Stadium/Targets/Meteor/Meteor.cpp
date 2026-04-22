@@ -74,6 +74,7 @@ void AMeteor::BeginPlay()
 {
 	Super::BeginPlay();
 
+	SetActorTickEnabled(true);
 	ApplyCollisionSettings();
 
 	if (MeteorFlipbookComponent && MeteorFlipbookComponent->GetAttachParent() != CollisionComponent)
@@ -99,7 +100,12 @@ void AMeteor::Tick(float DeltaSeconds)
 		return;
 	}
 
-	FVector MoveDirection = GetActorForwardVector();
+	FVector MoveDirection = GetActorForwardVector().GetSafeNormal();
+	if (MoveDirection.IsNearlyZero())
+	{
+		MoveDirection = FVector::XAxisVector;
+	}
+
 	if (const UWorld* World = GetWorld())
 	{
 		float ClosestDistanceSq = MAX_FLT;
@@ -114,8 +120,12 @@ void AMeteor::Tick(float DeltaSeconds)
 			const float DistanceSq = FVector::DistSquared(FighterJet->GetActorLocation(), GetActorLocation());
 			if (DistanceSq < ClosestDistanceSq)
 			{
-				ClosestDistanceSq = DistanceSq;
-				MoveDirection = (FighterJet->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+				const FVector DirectionToFighter = (FighterJet->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+				if (!DirectionToFighter.IsNearlyZero())
+				{
+					ClosestDistanceSq = DistanceSq;
+					MoveDirection = DirectionToFighter;
+				}
 			}
 		}
 	}
@@ -178,9 +188,15 @@ void AMeteor::SetChoiceData(const FText& InText, bool bInIsCorrectChoice)
 
 void AMeteor::SetMovementSpeed(float InSpeed)
 {
-	const float SafeMinimum = FMath::Max(MinimumMovementSpeed, 1.0f);
+	const float SafeMinimum = GetMinimumMovementSpeed();
 	MovementSpeed = FMath::Max(InSpeed, SafeMinimum);
 	MinimumMovementSpeed = SafeMinimum;
+	SetActorTickEnabled(true);
+}
+
+float AMeteor::GetMinimumMovementSpeed() const
+{
+	return FMath::Max(MinimumMovementSpeed, 1.0f);
 }
 
 FTransform AMeteor::GetTextWidgetRelativeTransform() const
@@ -300,8 +316,7 @@ void AMeteor::CacheTextWidgetRelativeTransform()
 
 float AMeteor::GetSafeMovementSpeed() const
 {
-	const float SafeMinimum = FMath::Max(MinimumMovementSpeed, 1.0f);
-	return FMath::Max(MovementSpeed, SafeMinimum);
+	return FMath::Max(MovementSpeed, GetMinimumMovementSpeed());
 }
 
 void AMeteor::HandleMeteorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

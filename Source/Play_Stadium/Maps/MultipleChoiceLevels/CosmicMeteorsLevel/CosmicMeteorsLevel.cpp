@@ -155,17 +155,15 @@ void ACosmicMeteorsLevel::ConfigureMeteorSpeeds(const FMultipleChoiceQuestionDat
 			continue;
 		}
 
-		const float BaseSpeed = CalculateBaseSpeedFromTimeLimit(Meteor, TimeLimit);
+		const float MinimumSpeed = Meteor->GetMinimumMovementSpeed();
+		const float BaseSpeed = FMath::Max(CalculateBaseSpeedFromTimeLimit(Meteor, TimeLimit), MinimumSpeed);
 		float TargetSpeed = BaseSpeed;
 
 		if (bBaseSpeedAssigned)
 		{
-			const float SpeedOffset = FMath::RandRange(0.0f, SpeedDeviationRange);
+			const float MaxSpeedOffset = FMath::Min(SpeedDeviationRange, FMath::Max(0.0f, BaseSpeed - MinimumSpeed));
+			const float SpeedOffset = FMath::RandRange(0.0f, MaxSpeedOffset);
 			TargetSpeed = BaseSpeed - SpeedOffset;
-			if (TargetSpeed < 0.0f)
-			{
-				TargetSpeed = 0.0f;
-			}
 		}
 		else
 		{
@@ -201,6 +199,12 @@ float ACosmicMeteorsLevel::FindDistanceAhead(const AMeteor* Meteor) const
 		return FallbackDistance;
 	}
 
+	const float ClosestFighterDistance = FindDistanceToClosestFighter(Meteor);
+	if (ClosestFighterDistance > KINDA_SMALL_NUMBER)
+	{
+		return ClosestFighterDistance;
+	}
+
 	const FVector StartLocation = Meteor->GetActorLocation();
 	const FVector Direction = Meteor->GetActorForwardVector().GetSafeNormal();
 	if (Direction.IsNearlyZero())
@@ -210,30 +214,6 @@ float ACosmicMeteorsLevel::FindDistanceAhead(const AMeteor* Meteor) const
 
 	if (const UWorld* World = GetWorld())
 	{
-		float ClosestFighterDistance = MaxTraceDistance;
-		bool bHasFighterDistance = false;
-
-		for (TActorIterator<AZD_FighterJet> It(World); It; ++It)
-		{
-			const AZD_FighterJet* FighterJet = *It;
-			if (!FighterJet)
-			{
-				continue;
-			}
-
-			const float ProjectedDistance = FVector::DotProduct(FighterJet->GetActorLocation() - StartLocation, Direction);
-			if (ProjectedDistance > 0.0f && ProjectedDistance < ClosestFighterDistance)
-			{
-				ClosestFighterDistance = ProjectedDistance;
-				bHasFighterDistance = true;
-			}
-		}
-
-		if (bHasFighterDistance)
-		{
-			return FMath::Max(KINDA_SMALL_NUMBER, ClosestFighterDistance);
-		}
-
 		const FVector EndLocation = StartLocation + Direction * MaxTraceDistance;
 
 		FHitResult HitResult;
@@ -245,4 +225,36 @@ float ACosmicMeteorsLevel::FindDistanceAhead(const AMeteor* Meteor) const
 	}
 
 	return FallbackDistance;
+}
+
+float ACosmicMeteorsLevel::FindDistanceToClosestFighter(const AMeteor* Meteor) const
+{
+	if (!Meteor)
+	{
+		return 0.0f;
+	}
+
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return 0.0f;
+	}
+
+	float ClosestDistance = MAX_FLT;
+	for (TActorIterator<AZD_FighterJet> It(World); It; ++It)
+	{
+		const AZD_FighterJet* FighterJet = *It;
+		if (!IsValid(FighterJet) || FighterJet->IsActorBeingDestroyed())
+		{
+			continue;
+		}
+
+		const float Distance = FVector::Dist(FighterJet->GetActorLocation(), Meteor->GetActorLocation());
+		if (Distance > KINDA_SMALL_NUMBER && Distance < ClosestDistance)
+		{
+			ClosestDistance = Distance;
+		}
+	}
+
+	return ClosestDistance < MAX_FLT ? ClosestDistance : 0.0f;
 }

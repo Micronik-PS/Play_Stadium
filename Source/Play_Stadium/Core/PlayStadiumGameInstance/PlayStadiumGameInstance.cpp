@@ -422,6 +422,16 @@ bool UPlayStadiumGameInstance::TryParseQuestionObject(const TSharedPtr<FJsonObje
 			QuestionData.SetTimeLimitInSeconds(TimeLimitInSeconds);
 			QuestionData.SetType(ParsedType);
 
+			FString QuestionText;
+			if (TryReadStringField(QuestionObject, TEXT("QuestionText"), QuestionText))
+			{
+				QuestionData.QuestionText = QuestionText;
+			}
+			else
+			{
+				UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Matching question is missing QuestionText field."));
+			}
+
 			const TSharedPtr<FJsonObject>* PairsObject = nullptr;
 			if (QuestionObject->TryGetObjectField(TEXT("Pairs"), PairsObject) && PairsObject && PairsObject->IsValid())
 			{

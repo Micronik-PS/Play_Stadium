@@ -12,6 +12,8 @@ struct FMatchingQuestionData : public FQuestionBaseData
 {
 	GENERATED_BODY()
 
+	UPROPERTY(BlueprintReadWrite, Category = "Matching Question")
+	FString QuestionText;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Matching Question")
 	TMap<FString, FString> Pairs;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputCoreTypes.h"
 #include "../MatchingQuestionPlayerControllerBase.h"
 #include "LaserConnectionPlayerController.generated.h"
 
@@ -25,10 +26,17 @@ private:
 	void ApplyMouseInputSettings();
 	void HandleLeftMousePressed();
 	void HandleLeftMouseReleased();
+	void HandleTouchPressed(ETouchIndex::Type FingerIndex, FVector Location);
+	void HandleTouchMoved(ETouchIndex::Type FingerIndex, FVector Location);
+	void HandleTouchReleased(ETouchIndex::Type FingerIndex, FVector Location);
+	void BeginPointerDrag();
+	void EndPointerDrag();
+	void UpdateActiveTouchLocation(ETouchIndex::Type FingerIndex, const FVector& Location);
 	void UpdateDraggedCable();
 	void TryAttachDraggedCable();
-	APowerCable* GetCableUnderCursor() const;
-	bool GetMouseWorldPointOnDragPlane(FVector& OutWorldPoint) const;
+	APowerCable* GetCableUnderPointer() const;
+	bool GetPointerScreenPosition(FVector2D& OutScreenPosition) const;
+	bool GetPointerWorldPointOnDragPlane(FVector& OutWorldPoint) const;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))
@@ -45,4 +53,10 @@ private:
 
 	UPROPERTY()
 	float DragPlaneY = 0.0f;
+
+	bool bUsingTouchPointer = false;
+
+	ETouchIndex::Type ActiveTouchIndex = ETouchIndex::MAX_TOUCHES;
+
+	FVector2D ActiveTouchScreenPosition = FVector2D::ZeroVector;
 };

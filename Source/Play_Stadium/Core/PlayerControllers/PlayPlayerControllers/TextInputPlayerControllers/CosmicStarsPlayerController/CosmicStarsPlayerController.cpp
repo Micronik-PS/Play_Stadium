@@ -6,6 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
+#include "Play_Stadium/Core/PixelStreaming/PixelStreamingCursorUtils.h"
 #include "Play_Stadium/Core/GameModes/PlayGameModes/TextInputGameModes/CosmicStarsGameMode/CosmicStarsGameMode.h"
 #include "Play_Stadium/Targets/CosmicSector/CosmicSector.h"
 
@@ -58,9 +59,13 @@ void ACosmicStarsPlayerController::OnPossess(APawn* InPawn)
 
 void ACosmicStarsPlayerController::ApplyMouseInputSettings()
 {
+	PlayStadium::PixelStreamingCursor::EnsureSoftwareCursors(GetWorld());
+
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+	DefaultMouseCursor = EMouseCursor::Default;
+	CurrentMouseCursor = EMouseCursor::Default;
 
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);

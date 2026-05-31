@@ -3,6 +3,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Engine/EngineTypes.h"
 
+#include "Play_Stadium/Core/PixelStreaming/PixelStreamingCursorUtils.h"
 #include "Play_Stadium/Core/UI/ResultMenuWidget/ResultMenuWidget.h"
 
 
@@ -36,6 +37,7 @@ void AResultPlayerController::ShowResultMenu()
 		return;
 	}
 
+	PlayStadium::PixelStreamingCursor::EnsureSoftwareCursors(GetWorld());
 	ResultMenuWidgetInstance->AddToViewport();
 
 	FInputModeUIOnly InputMode;
@@ -46,4 +48,6 @@ void AResultPlayerController::ShowResultMenu()
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+	DefaultMouseCursor = EMouseCursor::Default;
+	CurrentMouseCursor = EMouseCursor::Default;
 }

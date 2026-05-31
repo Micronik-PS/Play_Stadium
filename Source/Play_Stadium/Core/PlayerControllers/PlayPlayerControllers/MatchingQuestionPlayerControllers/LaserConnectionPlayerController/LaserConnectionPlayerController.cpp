@@ -5,6 +5,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "InputCoreTypes.h"
 #include "InputMappingContext.h"
+#include "Play_Stadium/Core/PixelStreaming/PixelStreamingCursorUtils.h"
 #include "Play_Stadium/Maps/MatchingQuestionLevels/LaserConnection/LaserConnectionLevel.h"
 #include "Play_Stadium/Targets/PowerCable/PowerCable.h"
 
@@ -41,6 +42,9 @@ void ALaserConnectionPlayerController::SetupInputComponent()
 	{
 		InputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ALaserConnectionPlayerController::HandleLeftMousePressed);
 		InputComponent->BindKey(EKeys::LeftMouseButton, IE_Released, this, &ALaserConnectionPlayerController::HandleLeftMouseReleased);
+		InputComponent->BindTouch(IE_Pressed, this, &ALaserConnectionPlayerController::HandleTouchPressed);
+		InputComponent->BindTouch(IE_Repeat, this, &ALaserConnectionPlayerController::HandleTouchMoved);
+		InputComponent->BindTouch(IE_Released, this, &ALaserConnectionPlayerController::HandleTouchReleased);
 	}
 }
 
@@ -69,9 +73,13 @@ void ALaserConnectionPlayerController::OnPossess(APawn* InPawn)
 
 void ALaserConnectionPlayerController::ApplyMouseInputSettings()
 {
+	PlayStadium::PixelStreamingCursor::EnsureSoftwareCursors(GetWorld());
+
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+	DefaultMouseCursor = EMouseCursor::Default;
+	CurrentMouseCursor = EMouseCursor::Default;
 
 	FInputModeGameAndUI InputMode;
 	InputMode.SetHideCursorDuringCapture(false);
@@ -81,9 +89,52 @@ void ALaserConnectionPlayerController::ApplyMouseInputSettings()
 
 void ALaserConnectionPlayerController::HandleLeftMousePressed()
 {
+	bUsingTouchPointer = false;
+	ActiveTouchIndex = ETouchIndex::MAX_TOUCHES;
 	ApplyMouseInputSettings();
+	BeginPointerDrag();
+}
 
-	APowerCable* Cable = GetCableUnderCursor();
+void ALaserConnectionPlayerController::HandleLeftMouseReleased()
+{
+	EndPointerDrag();
+}
+
+void ALaserConnectionPlayerController::HandleTouchPressed(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	if (ActiveTouchIndex != ETouchIndex::MAX_TOUCHES && ActiveTouchIndex != FingerIndex)
+	{
+		return;
+	}
+
+	bUsingTouchPointer = true;
+	UpdateActiveTouchLocation(FingerIndex, Location);
+	ApplyMouseInputSettings();
+	BeginPointerDrag();
+}
+
+void ALaserConnectionPlayerController::HandleTouchMoved(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	UpdateActiveTouchLocation(FingerIndex, Location);
+}
+
+void ALaserConnectionPlayerController::HandleTouchReleased(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	if (ActiveTouchIndex != FingerIndex)
+	{
+		return;
+	}
+
+	UpdateActiveTouchLocation(FingerIndex, Location);
+	EndPointerDrag();
+	bUsingTouchPointer = false;
+	ActiveTouchIndex = ETouchIndex::MAX_TOUCHES;
+	ActiveTouchScreenPosition = FVector2D::ZeroVector;
+}
+
+void ALaserConnectionPlayerController::BeginPointerDrag()
+{
+	APowerCable* Cable = GetCableUnderPointer();
 	if (!Cable || !Cable->CanBeDragged())
 	{
 		return;
@@ -93,7 +144,7 @@ void ALaserConnectionPlayerController::HandleLeftMousePressed()
 	DragPlaneY = Cable->GetActorLocation().Y;
 
 	FVector MouseWorldPoint;
-	if (GetMouseWorldPointOnDragPlane(MouseWorldPoint))
+	if (GetPointerWorldPointOnDragPlane(MouseWorldPoint))
 	{
 		DragGrabOffset = Cable->GetActorLocation() - MouseWorldPoint;
 		DragGrabOffset.Y = 0.0f;
@@ -104,7 +155,7 @@ void ALaserConnectionPlayerController::HandleLeftMousePressed()
 	}
 }
 
-void ALaserConnectionPlayerController::HandleLeftMouseReleased()
+void ALaserConnectionPlayerController::EndPointerDrag()
 {
 	if (DraggedCable.IsValid())
 	{
@@ -114,6 +165,18 @@ void ALaserConnectionPlayerController::HandleLeftMouseReleased()
 	DraggedCable.Reset();
 	DragGrabOffset = FVector::ZeroVector;
 	ApplyMouseInputSettings();
+}
+
+void ALaserConnectionPlayerController::UpdateActiveTouchLocation(ETouchIndex::Type FingerIndex, const FVector& Location)
+{
+	if (!bUsingTouchPointer || (ActiveTouchIndex != ETouchIndex::MAX_TOUCHES && ActiveTouchIndex != FingerIndex))
+	{
+		return;
+	}
+
+	ActiveTouchIndex = FingerIndex;
+	ActiveTouchScreenPosition = FVector2D(Location.X, Location.Y);
+	SetMouseLocation(FMath::RoundToInt(Location.X), FMath::RoundToInt(Location.Y));
 }
 
 void ALaserConnectionPlayerController::UpdateDraggedCable()
@@ -126,7 +189,7 @@ void ALaserConnectionPlayerController::UpdateDraggedCable()
 	}
 
 	FVector MouseWorldPoint;
-	if (!GetMouseWorldPointOnDragPlane(MouseWorldPoint))
+	if (!GetPointerWorldPointOnDragPlane(MouseWorldPoint))
 	{
 		return;
 	}
@@ -165,10 +228,11 @@ void ALaserConnectionPlayerController::TryAttachDraggedCable()
 	}
 }
 
-APowerCable* ALaserConnectionPlayerController::GetCableUnderCursor() const
+APowerCable* ALaserConnectionPlayerController::GetCableUnderPointer() const
 {
+	FVector2D ScreenPosition;
 	FHitResult HitResult;
-	if (!GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+	if (!GetPointerScreenPosition(ScreenPosition) || !GetHitResultAtScreenPosition(ScreenPosition, ECC_Visibility, false, HitResult))
 	{
 		return nullptr;
 	}
@@ -182,11 +246,41 @@ APowerCable* ALaserConnectionPlayerController::GetCableUnderCursor() const
 	return Cable;
 }
 
-bool ALaserConnectionPlayerController::GetMouseWorldPointOnDragPlane(FVector& OutWorldPoint) const
+bool ALaserConnectionPlayerController::GetPointerScreenPosition(FVector2D& OutScreenPosition) const
+{
+	if (bUsingTouchPointer && ActiveTouchIndex != ETouchIndex::MAX_TOUCHES)
+	{
+		double TouchX = 0.0;
+		double TouchY = 0.0;
+		bool bTouchPressed = false;
+		GetInputTouchState(ActiveTouchIndex, TouchX, TouchY, bTouchPressed);
+		if (bTouchPressed)
+		{
+			OutScreenPosition = FVector2D(TouchX, TouchY);
+			return true;
+		}
+
+		OutScreenPosition = ActiveTouchScreenPosition;
+		return true;
+	}
+
+	float MouseX = 0.0f;
+	float MouseY = 0.0f;
+	if (!GetMousePosition(MouseX, MouseY))
+	{
+		return false;
+	}
+
+	OutScreenPosition = FVector2D(MouseX, MouseY);
+	return true;
+}
+
+bool ALaserConnectionPlayerController::GetPointerWorldPointOnDragPlane(FVector& OutWorldPoint) const
 {
 	FVector WorldLocation;
 	FVector WorldDirection;
-	if (!DeprojectMousePositionToWorld(WorldLocation, WorldDirection))
+	FVector2D ScreenPosition;
+	if (!GetPointerScreenPosition(ScreenPosition) || !DeprojectScreenPositionToWorld(ScreenPosition.X, ScreenPosition.Y, WorldLocation, WorldDirection))
 	{
 		return false;
 	}

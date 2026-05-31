@@ -2,6 +2,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "Engine/EngineTypes.h"
+#include "Play_Stadium/Core/PixelStreaming/PixelStreamingCursorUtils.h"
 #include "Play_Stadium/Core/UI/StartMenuWidget/StartMenuWidget.h"
 
 
@@ -22,6 +23,7 @@ void AStartPlayerController::BeginPlay()
 	StartMenuWidgetInstance = CreateWidget<UStartMenuWidget>(this, StartMenuWidgetClass);
 	if (StartMenuWidgetInstance)
 	{
+		PlayStadium::PixelStreamingCursor::EnsureSoftwareCursors(GetWorld());
 		StartMenuWidgetInstance->AddToViewport();
 
 		FInputModeUIOnly InputMode;
@@ -32,5 +34,7 @@ void AStartPlayerController::BeginPlay()
 		bShowMouseCursor = true;
 		bEnableClickEvents = true;
 		bEnableMouseOverEvents = true;
+		DefaultMouseCursor = EMouseCursor::Default;
+		CurrentMouseCursor = EMouseCursor::Default;
 	}
 }

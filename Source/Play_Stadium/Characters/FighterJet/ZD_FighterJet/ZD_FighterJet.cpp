@@ -4,6 +4,7 @@
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "TimerManager.h"
 #include "Play_Stadium/Characters/FighterJet/ZDA_FighterJet/ZDA_FighterJet.h"
 #include "Play_Stadium/Projectiles/FighterJetProjectile/FighterJetProjectile.h"
@@ -32,6 +33,16 @@ void AZD_FighterJet::BeginPlay()
 	}
 }
 
+void AZD_FighterJet::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (bHasActiveTouchRotation)
+	{
+		RotateByDirection(ActiveTouchRotateDirection);
+	}
+}
+
 void AZD_FighterJet::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -47,6 +58,13 @@ void AZD_FighterJet::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		{
 			EnhancedInputComponent->BindAction(RotateAction, ETriggerEvent::Triggered, this, &AZD_FighterJet::Rotate);
 		}
+	}
+
+	if (PlayerInputComponent)
+	{
+		PlayerInputComponent->BindTouch(IE_Pressed, this, &AZD_FighterJet::HandleTouchPressed);
+		PlayerInputComponent->BindTouch(IE_Repeat, this, &AZD_FighterJet::HandleTouchMoved);
+		PlayerInputComponent->BindTouch(IE_Released, this, &AZD_FighterJet::HandleTouchReleased);
 	}
 }
 
@@ -97,7 +115,11 @@ void AZD_FighterJet::Fire()
 
 void AZD_FighterJet::Rotate(const FInputActionValue& Value)
 {
-	const float InputValue = Value.Get<float>();
+	RotateByDirection(Value.Get<float>());
+}
+
+void AZD_FighterJet::RotateByDirection(float InputValue)
+{
 	if (FMath::IsNearlyZero(InputValue))
 	{
 		return;
@@ -113,6 +135,60 @@ void AZD_FighterJet::Rotate(const FInputActionValue& Value)
 			LocalController->SetControlRotation(GetActorRotation());
 		}
 	}
+}
+
+void AZD_FighterJet::HandleTouchPressed(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	if (bHasActiveTouchRotation && ActiveRotationTouchIndex != FingerIndex)
+	{
+		Fire();
+		return;
+	}
+
+	if (IsTouchInFireArea(Location))
+	{
+		Fire();
+		return;
+	}
+
+	StartTouchRotation(FingerIndex, Location);
+}
+
+void AZD_FighterJet::HandleTouchMoved(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	if (bHasActiveTouchRotation && ActiveRotationTouchIndex == FingerIndex)
+	{
+		UpdateTouchRotation(Location);
+	}
+}
+
+void AZD_FighterJet::HandleTouchReleased(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	if (bHasActiveTouchRotation && ActiveRotationTouchIndex == FingerIndex)
+	{
+		bHasActiveTouchRotation = false;
+		ActiveRotationTouchIndex = ETouchIndex::MAX_TOUCHES;
+		ActiveTouchRotateDirection = 0.0f;
+	}
+}
+
+void AZD_FighterJet::StartTouchRotation(ETouchIndex::Type FingerIndex, const FVector& Location)
+{
+	bHasActiveTouchRotation = true;
+	ActiveRotationTouchIndex = FingerIndex;
+	UpdateTouchRotation(Location);
+}
+
+void AZD_FighterJet::UpdateTouchRotation(const FVector& Location)
+{
+	FVector2D ViewportSize;
+	if (!GetViewportSize(ViewportSize) || ViewportSize.X <= 0.0f)
+	{
+		ActiveTouchRotateDirection = 0.0f;
+		return;
+	}
+
+	ActiveTouchRotateDirection = Location.X < ViewportSize.X * 0.5f ? -1.0f : 1.0f;
 }
 
 void AZD_FighterJet::ResetFireCooldown()
@@ -134,4 +210,35 @@ void AZD_FighterJet::TriggerAnimFireEvent()
 bool AZD_FighterJet::CanFire() const
 {
 	return bCanFire;
+}
+
+bool AZD_FighterJet::IsTouchInFireArea(const FVector& Location) const
+{
+	FVector2D ViewportSize;
+	if (!GetViewportSize(ViewportSize) || ViewportSize.Y <= 0.0f)
+	{
+		return false;
+	}
+
+	return Location.Y <= ViewportSize.Y * FireAreaScreenHeightRatio;
+}
+
+bool AZD_FighterJet::GetViewportSize(FVector2D& OutViewportSize) const
+{
+	const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	if (!PlayerController)
+	{
+		return false;
+	}
+
+	int32 ViewportWidth = 0;
+	int32 ViewportHeight = 0;
+	PlayerController->GetViewportSize(ViewportWidth, ViewportHeight);
+	if (ViewportWidth <= 0 || ViewportHeight <= 0)
+	{
+		return false;
+	}
+
+	OutViewportSize = FVector2D(ViewportWidth, ViewportHeight);
+	return true;
 }

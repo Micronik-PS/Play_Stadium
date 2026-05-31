@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InputCoreTypes.h"
 #include "../TextInputPlayerControllerBase.h"
 #include "CosmicStarsPlayerController.generated.h"
 
+class ACosmicSector;
 class UInputMappingContext;
 
 UCLASS()
@@ -22,6 +24,9 @@ protected:
 private:
 	void ApplyMouseInputSettings();
 	void HandleLeftMousePressed();
+	void HandleTouchPressed(ETouchIndex::Type FingerIndex, FVector Location);
+	void HandlePointerPressedAtScreenPosition(const FVector2D& ScreenPosition);
+	ACosmicSector* GetSectorAtScreenPosition(const FVector2D& ScreenPosition) const;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input", meta = (AllowPrivateAccess = "true"))

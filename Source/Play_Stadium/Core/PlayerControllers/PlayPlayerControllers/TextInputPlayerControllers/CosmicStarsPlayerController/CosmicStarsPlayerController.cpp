@@ -31,6 +31,7 @@ void ACosmicStarsPlayerController::SetupInputComponent()
 	if (InputComponent)
 	{
 		InputComponent->BindKey(EKeys::LeftMouseButton, IE_Pressed, this, &ACosmicStarsPlayerController::HandleLeftMousePressed);
+		InputComponent->BindTouch(IE_Pressed, this, &ACosmicStarsPlayerController::HandleTouchPressed);
 	}
 }
 
@@ -64,6 +65,7 @@ void ACosmicStarsPlayerController::ApplyMouseInputSettings()
 	bShowMouseCursor = true;
 	bEnableClickEvents = true;
 	bEnableMouseOverEvents = true;
+	bEnableTouchEvents = true;
 	DefaultMouseCursor = EMouseCursor::Default;
 	CurrentMouseCursor = EMouseCursor::Default;
 
@@ -77,18 +79,26 @@ void ACosmicStarsPlayerController::HandleLeftMousePressed()
 {
 	ApplyMouseInputSettings();
 
-	FHitResult HitResult;
-	if (!GetHitResultUnderCursor(ECC_Visibility, false, HitResult))
+	float MouseX = 0.0f;
+	float MouseY = 0.0f;
+	if (!GetMousePosition(MouseX, MouseY))
 	{
 		return;
 	}
 
-	ACosmicSector* SelectedSector = Cast<ACosmicSector>(HitResult.GetActor());
-	if (!SelectedSector && HitResult.GetComponent())
-	{
-		SelectedSector = Cast<ACosmicSector>(HitResult.GetComponent()->GetOwner());
-	}
+	HandlePointerPressedAtScreenPosition(FVector2D(MouseX, MouseY));
+}
 
+void ACosmicStarsPlayerController::HandleTouchPressed(ETouchIndex::Type FingerIndex, FVector Location)
+{
+	ApplyMouseInputSettings();
+	SetMouseLocation(FMath::RoundToInt(Location.X), FMath::RoundToInt(Location.Y));
+	HandlePointerPressedAtScreenPosition(FVector2D(Location.X, Location.Y));
+}
+
+void ACosmicStarsPlayerController::HandlePointerPressedAtScreenPosition(const FVector2D& ScreenPosition)
+{
+	ACosmicSector* SelectedSector = GetSectorAtScreenPosition(ScreenPosition);
 	if (!SelectedSector || !SelectedSector->CanBeSelected())
 	{
 		return;
@@ -104,4 +114,21 @@ void ACosmicStarsPlayerController::HandleLeftMousePressed()
 	}
 
 	ApplyMouseInputSettings();
+}
+
+ACosmicSector* ACosmicStarsPlayerController::GetSectorAtScreenPosition(const FVector2D& ScreenPosition) const
+{
+	FHitResult HitResult;
+	if (!GetHitResultAtScreenPosition(ScreenPosition, ECC_Visibility, false, HitResult))
+	{
+		return nullptr;
+	}
+
+	ACosmicSector* SelectedSector = Cast<ACosmicSector>(HitResult.GetActor());
+	if (!SelectedSector && HitResult.GetComponent())
+	{
+		SelectedSector = Cast<ACosmicSector>(HitResult.GetComponent()->GetOwner());
+	}
+
+	return SelectedSector;
 }

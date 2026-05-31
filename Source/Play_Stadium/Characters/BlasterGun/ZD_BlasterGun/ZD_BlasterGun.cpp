@@ -2,9 +2,15 @@
 #include "EnhancedInputComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/Controller.h"
+#include "GameFramework/PlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "Math/RotationMatrix.h"
 #include "../ZDA_BlasterGun/ZDA_BlasterGun.h"
+
+AZD_BlasterGun::AZD_BlasterGun()
+{
+    PrimaryActorTick.bCanEverTick = true;
+}
 
 void AZD_BlasterGun::BeginPlay()
 {
@@ -19,6 +25,16 @@ void AZD_BlasterGun::BeginPlay()
                 OnBlasterGunFired.AddDynamic(BlasterGunAnimInstance, &UZDA_BlasterGun::HandleBlasterGunFired);
             }
         }
+    }
+}
+
+void AZD_BlasterGun::Tick(float DeltaSeconds)
+{
+    Super::Tick(DeltaSeconds);
+
+    if (bHasActiveTouchMovement)
+    {
+        MoveHorizontalByDirection(ActiveTouchMoveDirection);
     }
 }
 
@@ -38,11 +54,22 @@ void AZD_BlasterGun::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
             EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &AZD_BlasterGun::Fire);
         }
     }
+
+    if (PlayerInputComponent)
+    {
+        PlayerInputComponent->BindTouch(IE_Pressed, this, &AZD_BlasterGun::HandleTouchPressed);
+        PlayerInputComponent->BindTouch(IE_Repeat, this, &AZD_BlasterGun::HandleTouchMoved);
+        PlayerInputComponent->BindTouch(IE_Released, this, &AZD_BlasterGun::HandleTouchReleased);
+    }
 }
 
 void AZD_BlasterGun::MoveHorizontal(const FInputActionValue& Value)
 {
-    const float Direction = Value.Get<float>();
+    MoveHorizontalByDirection(Value.Get<float>());
+}
+
+void AZD_BlasterGun::MoveHorizontalByDirection(float Direction)
+{
     if (FMath::IsNearlyZero(Direction))
     {
         return;
@@ -81,4 +108,89 @@ void AZD_BlasterGun::Fire()
             OnBlasterGunFired.Broadcast();
         }
     }
+}
+
+void AZD_BlasterGun::HandleTouchPressed(ETouchIndex::Type FingerIndex, FVector Location)
+{
+    if (bHasActiveTouchMovement && ActiveMovementTouchIndex != FingerIndex)
+    {
+        Fire();
+        return;
+    }
+
+    if (IsTouchInFireArea(Location))
+    {
+        Fire();
+        return;
+    }
+
+    StartTouchMovement(FingerIndex, Location);
+}
+
+void AZD_BlasterGun::HandleTouchMoved(ETouchIndex::Type FingerIndex, FVector Location)
+{
+    if (bHasActiveTouchMovement && ActiveMovementTouchIndex == FingerIndex)
+    {
+        UpdateTouchMovement(Location);
+    }
+}
+
+void AZD_BlasterGun::HandleTouchReleased(ETouchIndex::Type FingerIndex, FVector Location)
+{
+    if (bHasActiveTouchMovement && ActiveMovementTouchIndex == FingerIndex)
+    {
+        bHasActiveTouchMovement = false;
+        ActiveMovementTouchIndex = ETouchIndex::MAX_TOUCHES;
+        ActiveTouchMoveDirection = 0.0f;
+    }
+}
+
+void AZD_BlasterGun::StartTouchMovement(ETouchIndex::Type FingerIndex, const FVector& Location)
+{
+    bHasActiveTouchMovement = true;
+    ActiveMovementTouchIndex = FingerIndex;
+    UpdateTouchMovement(Location);
+}
+
+void AZD_BlasterGun::UpdateTouchMovement(const FVector& Location)
+{
+    FVector2D ViewportSize;
+    if (!GetViewportSize(ViewportSize) || ViewportSize.X <= 0.0f)
+    {
+        ActiveTouchMoveDirection = 0.0f;
+        return;
+    }
+
+    ActiveTouchMoveDirection = Location.X < ViewportSize.X * 0.5f ? -1.0f : 1.0f;
+}
+
+bool AZD_BlasterGun::IsTouchInFireArea(const FVector& Location) const
+{
+    FVector2D ViewportSize;
+    if (!GetViewportSize(ViewportSize) || ViewportSize.Y <= 0.0f)
+    {
+        return false;
+    }
+
+    return Location.Y <= ViewportSize.Y * FireAreaScreenHeightRatio;
+}
+
+bool AZD_BlasterGun::GetViewportSize(FVector2D& OutViewportSize) const
+{
+    const APlayerController* PlayerController = Cast<APlayerController>(GetController());
+    if (!PlayerController)
+    {
+        return false;
+    }
+
+    int32 ViewportWidth = 0;
+    int32 ViewportHeight = 0;
+    PlayerController->GetViewportSize(ViewportWidth, ViewportHeight);
+    if (ViewportWidth <= 0 || ViewportHeight <= 0)
+    {
+        return false;
+    }
+
+    OutViewportSize = FVector2D(ViewportWidth, ViewportHeight);
+    return true;
 }

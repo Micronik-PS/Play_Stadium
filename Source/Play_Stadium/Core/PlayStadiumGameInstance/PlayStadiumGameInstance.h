@@ -41,6 +41,7 @@ public:
 
 protected:
     void LoadQuestionsFromJson();
+	bool TryLoadQuestionsFile(const FString& QuestionsFilePath, FString& OutFileContent) const;
     bool TryParseQuestionObject(const TSharedPtr<FJsonObject>& QuestionObject, TObjectPtr<UQuestionBase>& OutQuestion);
     void ApplyQuestionsShuffleMode();
 

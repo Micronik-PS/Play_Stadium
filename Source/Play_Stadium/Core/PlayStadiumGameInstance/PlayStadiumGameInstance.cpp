@@ -5,6 +5,7 @@
 #include "Engine/Engine.h"
 #include "Dom/JsonObject.h"
 #include "Dom/JsonValue.h"
+#include "Containers/StringConv.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "Serialization/JsonReader.h"
@@ -139,7 +140,7 @@ void UPlayStadiumGameInstance::LoadQuestionsFromJson()
 	}
 
 	FString FileContent;
-	if (!FFileHelper::LoadFileToString(FileContent, *QuestionsFilePath))
+	if (!TryLoadQuestionsFile(QuestionsFilePath, FileContent))
 	{
 		UE_LOG(LogPlayStadiumGameInstance, Error, TEXT("Failed to read questions definition file: %s"), *QuestionsFilePath);
 		return;
@@ -200,6 +201,40 @@ void UPlayStadiumGameInstance::LoadQuestionsFromJson()
 			UE_LOG(LogPlayStadiumGameInstance, Warning, TEXT("Failed to parse question at index %d."), QuestionIndex);
 		}
 	}
+}
+
+bool UPlayStadiumGameInstance::TryLoadQuestionsFile(const FString& QuestionsFilePath, FString& OutFileContent) const
+{
+	OutFileContent.Reset();
+
+	TArray<uint8> FileBytes;
+	if (!FFileHelper::LoadFileToArray(FileBytes, *QuestionsFilePath))
+	{
+		return false;
+	}
+
+	if (FileBytes.IsEmpty())
+	{
+		return true;
+	}
+
+	if (FileBytes.Num() >= 2 &&
+		((FileBytes[0] == 0xFF && FileBytes[1] == 0xFE) || (FileBytes[0] == 0xFE && FileBytes[1] == 0xFF)))
+	{
+		return FFileHelper::LoadFileToString(OutFileContent, *QuestionsFilePath);
+	}
+
+	int32 DataOffset = 0;
+	if (FileBytes.Num() >= 3 && FileBytes[0] == 0xEF && FileBytes[1] == 0xBB && FileBytes[2] == 0xBF)
+	{
+		DataOffset = 3;
+	}
+
+	const int32 DataSize = FileBytes.Num() - DataOffset;
+	const ANSICHAR* Utf8Data = reinterpret_cast<const ANSICHAR*>(FileBytes.GetData() + DataOffset);
+	const FUTF8ToTCHAR ConvertedText(Utf8Data, DataSize);
+	OutFileContent = FString(ConvertedText.Length(), ConvertedText.Get());
+	return true;
 }
 
 

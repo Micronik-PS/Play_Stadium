@@ -3,6 +3,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/TextRenderComponent.h"
+#include "Engine/Font.h"
 #include "Engine/World.h"
 #include "Materials/MaterialInterface.h"
 #include "PaperSpriteComponent.h"
@@ -48,6 +49,13 @@ APowerSocket::APowerSocket()
 	if (UnlitTextMat.Succeeded())
 	{
 		SocketTextComponent->SetTextMaterial(UnlitTextMat.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UFont> DefaultTextFont(TEXT("/Game/Play_Stadium/Fonts/Font_Arial.Font_Arial"));
+	if (DefaultTextFont.Succeeded())
+	{
+		TextFont = DefaultTextFont.Object;
+		SocketTextComponent->SetFont(TextFont);
 	}
 
 	SocketTextComponent->SetText(Text);
@@ -147,6 +155,7 @@ void APowerSocket::UpdateVisuals()
 {
 	if (SocketTextComponent)
 	{
+		ApplyTextFont();
 		SocketTextComponent->SetText(Text);
 		SocketTextComponent->MarkRenderStateDirty();
 	}
@@ -164,6 +173,15 @@ void APowerSocket::ApplyLayout()
 		SocketTextComponent->SetRelativeLocation(TextOffset);
 		SocketTextComponent->SetRelativeRotation(FRotator(0.0f, 90.0f, 0.0f));
 		SocketTextComponent->SetWorldSize(TextWorldSize);
+		ApplyTextFont();
+	}
+}
+
+void APowerSocket::ApplyTextFont()
+{
+	if (SocketTextComponent && TextFont)
+	{
+		SocketTextComponent->SetFont(TextFont);
 	}
 }
 

@@ -6,6 +6,7 @@
 
 class APowerCable;
 class UBoxComponent;
+class UFont;
 class UPaperSpriteComponent;
 class USceneComponent;
 class UTextRenderComponent;
@@ -75,6 +76,7 @@ protected:
 private:
 	void UpdateVisuals();
 	void ApplyLayout();
+	void ApplyTextFont();
 	void ApplyCollisionSettings() const;
 #if WITH_EDITOR
 	void UpdateEditorPreviewInstances();
@@ -91,6 +93,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PowerSocket|Layout", meta = (AllowPrivateAccess = "true"))
 	float TextWorldSize = 24.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PowerSocket|Content", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UFont> TextFont = nullptr;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PowerSocket|Collision", meta = (AllowPrivateAccess = "true"))
 	FVector CollisionExtent = FVector(60.0f, 10.0f, 60.0f);

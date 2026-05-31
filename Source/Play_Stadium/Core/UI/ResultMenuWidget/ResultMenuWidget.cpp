@@ -123,6 +123,16 @@ void UResultMenuWidget::NativeConstruct()
 	RefreshScoreText();
 }
 
+TSharedPtr<SWidget> UResultMenuWidget::GetInitialFocusWidget()
+{
+	if (ExitButton)
+	{
+		return ExitButton->TakeWidget();
+	}
+
+	return nullptr;
+}
+
 void UResultMenuWidget::BuildLayout()
 {
 	if (!WidgetTree)

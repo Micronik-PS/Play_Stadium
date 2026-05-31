@@ -41,7 +41,10 @@ void AResultPlayerController::ShowResultMenu()
 	ResultMenuWidgetInstance->AddToViewport();
 
 	FInputModeUIOnly InputMode;
-	InputMode.SetWidgetToFocus(ResultMenuWidgetInstance->TakeWidget());
+	if (TSharedPtr<SWidget> FocusWidget = ResultMenuWidgetInstance->GetInitialFocusWidget())
+	{
+		InputMode.SetWidgetToFocus(FocusWidget);
+	}
 	InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 	SetInputMode(InputMode);
 

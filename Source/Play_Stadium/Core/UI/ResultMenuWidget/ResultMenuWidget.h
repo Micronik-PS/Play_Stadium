@@ -8,6 +8,7 @@ class UBorder;
 class UButton;
 class UCanvasPanel;
 class USizeBox;
+class SWidget;
 class UTextBlock;
 
 UCLASS()
@@ -18,6 +19,9 @@ class PLAY_STADIUM_API UResultMenuWidget : public UUserWidget
 protected:
 	virtual TSharedRef<SWidget> RebuildWidget() override;
 	virtual void NativeConstruct() override;
+
+public:
+	TSharedPtr<SWidget> GetInitialFocusWidget();
 
 private:
 	void BuildLayout();

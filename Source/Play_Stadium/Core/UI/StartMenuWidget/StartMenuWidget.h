@@ -8,6 +8,7 @@ class UBorder;
 class UButton;
 class UCanvasPanel;
 class USizeBox;
+class SWidget;
 class UTextBlock;
 
 UCLASS()
@@ -19,6 +20,9 @@ protected:
         virtual TSharedRef<SWidget> RebuildWidget() override;
         virtual void NativePreConstruct() override;
         virtual void NativeConstruct() override;
+
+public:
+        TSharedPtr<SWidget> GetInitialFocusWidget();
 
 private:
         void BuildLayout();

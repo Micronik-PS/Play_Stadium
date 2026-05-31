@@ -27,7 +27,10 @@ void AStartPlayerController::BeginPlay()
 		StartMenuWidgetInstance->AddToViewport();
 
 		FInputModeUIOnly InputMode;
-		InputMode.SetWidgetToFocus(StartMenuWidgetInstance->TakeWidget());
+		if (TSharedPtr<SWidget> FocusWidget = StartMenuWidgetInstance->GetInitialFocusWidget())
+		{
+			InputMode.SetWidgetToFocus(FocusWidget);
+		}
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		SetInputMode(InputMode);
 

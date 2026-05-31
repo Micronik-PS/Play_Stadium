@@ -65,6 +65,21 @@ void UStartMenuWidget::NativeConstruct()
         BindButtonCallbacks();
 }
 
+TSharedPtr<SWidget> UStartMenuWidget::GetInitialFocusWidget()
+{
+        if (StartTestButton)
+        {
+                return StartTestButton->TakeWidget();
+        }
+
+        if (ExitButton)
+        {
+                return ExitButton->TakeWidget();
+        }
+
+        return nullptr;
+}
+
 void UStartMenuWidget::BuildLayout()
 {
         if (!WidgetTree)
